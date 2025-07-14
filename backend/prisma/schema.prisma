@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      UserRole
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  visitRequests VisitRequest[]
+  approvals     Approval[]
+  scanLogs      ScanLog[]
+}
+
+enum UserRole {
+  PARENT
+  SECURITY
+  WARDEN
+}
+
+model Student {
+  id         String @id @default(uuid())
+  name       String
+  rollNumber String @unique
+  course     String
+  branch     String
+  year       Int
+  hostelName String
+  roomNumber String?
+
+  // Relations
+  visitRequests VisitRequest[]
+}
+
+model VisitRequest {
+  id          String        @id @default(uuid())
+  parentId    String
+  studentId   String
+  vehicleNo   String?
+  purpose     String?
+  status      RequestStatus @default(PENDING)
+  qrCode      String        @unique
+  validFrom   DateTime
+  validUntil  DateTime
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  parent    User        @relation(fields: [parentId], references: [id])
+  student   Student     @relation(fields: [studentId], references: [id])
+  approvals Approval[]
+  scanLogs  ScanLog[]
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model Approval {
+  id              String   @id @default(uuid())
+  visitRequestId  String
+  wardenId        String
+  status          Boolean
+  remarks         String?
+  approvedAt      DateTime @default(now())
+
+  // Relations
+  visitRequest VisitRequest @relation(fields: [visitRequestId], references: [id])
+  warden       User         @relation(fields: [wardenId], references: [id])
+
+  @@unique([visitRequestId, wardenId])
+}
+
+model ScanLog {
+  id             String   @id @default(uuid())
+  visitRequestId String
+  scannedBy      String
+  scanType       ScanType
+  location       String?
+  timestamp      DateTime @default(now())
+  remarks        String?
+
+  // Relations
+  visitRequest VisitRequest @relation(fields: [visitRequestId], references: [id])
+  scanner      User         @relation(fields: [scannedBy], references: [id])
+}
+
+enum ScanType {
+  ENTRY
+  EXIT
+}
