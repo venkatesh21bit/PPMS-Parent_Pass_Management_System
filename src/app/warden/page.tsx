@@ -220,14 +220,13 @@ export default function WardenDashboard() {
       if (
         error &&
         typeof error === 'object' &&
-        error !== null &&
         'response' in error &&
-        (error as any).response &&
-        typeof (error as any).response === 'object' &&
-        'data' in (error as any).response &&
-        (error as any).response.data &&
-        typeof (error as any).response.data === 'object' &&
-        'error' in (error as any).response.data
+        typeof (error as { response?: unknown }).response === 'object' &&
+        (error as { response?: { data?: unknown } }).response &&
+        'data' in (error as { response: { data?: unknown } }).response &&
+        typeof ((error as { response: { data?: unknown } }).response.data) === 'object' &&
+        ((error as { response: { data: { error?: string } } }).response.data &&
+          'error' in (error as { response: { data: { error?: string } } }).response.data)
       ) {
         message = ((error as { response: { data: { error?: string } } }).response.data.error) || message;
       }
@@ -256,14 +255,13 @@ export default function WardenDashboard() {
       if (
         error &&
         typeof error === 'object' &&
-        error !== null &&
         'response' in error &&
-        (error as any).response &&
-        typeof (error as any).response === 'object' &&
-        'data' in (error as any).response &&
-        (error as any).response.data &&
-        typeof (error as any).response.data === 'object' &&
-        'message' in (error as any).response.data
+        typeof (error as { response?: unknown }).response === 'object' &&
+        (error as { response?: { data?: unknown } }).response &&
+        'data' in (error as { response: { data?: unknown } }).response &&
+        typeof ((error as { response: { data?: unknown } }).response.data) === 'object' &&
+        ((error as { response: { data: { message?: string } } }).response.data &&
+          'message' in (error as { response: { data: { message?: string } } }).response.data)
       ) {
         message = ((error as { response: { data: { message?: string } } }).response.data.message) || message;
       }
