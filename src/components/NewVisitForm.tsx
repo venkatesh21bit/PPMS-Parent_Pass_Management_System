@@ -95,10 +95,14 @@ export default function NewVisitForm({ isOpen, onClose, onSuccess }: NewVisitFor
       
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
+      let errorMsg = 'Failed to submit request';
+      if (typeof error === 'object' && error !== null && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+        errorMsg = (error.response.data as { message?: string }).message || errorMsg;
+      }
       addToast({
         title: 'Error',
-        message: error.response?.data?.message || 'Failed to submit request',
+        message: errorMsg,
         type: 'error'
       });
     } finally {

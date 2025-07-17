@@ -143,6 +143,7 @@ export default function SecurityDashboard() {
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getScanTypeIcon = (_scanType: string): ReactElement => {
     return <QrCode className="w-5 h-5 text-blue-500" />;
   };
@@ -241,7 +242,7 @@ export default function SecurityDashboard() {
                     <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Today's Entries</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Today&apos;s Entries</p>
                     <p className="text-xl font-bold text-gray-900 dark:text-white">
                       {(Array.isArray(scanLogs) ? scanLogs : []).filter(log => 
                         log.scanType === SCAN_TYPES.ENTRY && 

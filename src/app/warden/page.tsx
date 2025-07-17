@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { VisitRequest, Approval } from '@/types';
+import { VisitRequest } from '@/types';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { VISIT_STATUS } from '@/lib/constants';
@@ -170,6 +170,7 @@ function ApprovalModal({ request, isOpen, onClose, onApprove, onReject }: Approv
   );
 }
 
+
 export default function WardenDashboard() {
   const { user } = useAuth();
   const { addToast } = useToast();
@@ -179,10 +180,6 @@ export default function WardenDashboard() {
   const [selectedRequest, setSelectedRequest] = useState<VisitRequest | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'pending-scans'>('pending-scans');
-
-  useEffect(() => {
-    fetchVisitRequests();
-  }, []); // fetchVisitRequests is defined inline, so no need to add as dependency
 
   const fetchVisitRequests = async () => {
     try {
@@ -203,6 +200,10 @@ export default function WardenDashboard() {
     }
   };
 
+  useEffect(() => {
+    fetchVisitRequests();
+  }, [fetchVisitRequests]);
+
   const handleApprove = async (requestId: string, comments?: string) => {
     try {
       await api.post(`/visits/${requestId}/approve`, { 
@@ -215,9 +216,9 @@ export default function WardenDashboard() {
         type: 'success'
       });
       fetchVisitRequests();
-    } catch (error: unknown) {
+    } catch (error) {
       let message = 'Failed to approve request';
-      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data) {
+      if (error && typeof error === 'object' && error !== null && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data) {
         message = (error.response.data as { error?: string }).error || message;
       }
       addToast({
@@ -240,9 +241,9 @@ export default function WardenDashboard() {
         type: 'success'
       });
       fetchVisitRequests();
-    } catch (error: unknown) {
+    } catch (error) {
       let message = 'Failed to reject request';
-      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+      if (error && typeof error === 'object' && error !== null && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
         message = (error.response.data as { message?: string }).message || message;
       }
       addToast({
