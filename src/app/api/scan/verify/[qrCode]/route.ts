@@ -117,7 +117,7 @@ export async function GET(
       nextAction = 'EXIT';
       currentStatus = 'Currently inside - ready for exit';
       // Require approval for exit
-      const approvedApproval = visitRequest.approvals.find(approval => approval.status === true);
+      const approvedApproval = visitRequest.approvals.find((approval: { status: boolean }) => approval.status === true);
       if (!approvedApproval) {
         return NextResponse.json({
           valid: false,
