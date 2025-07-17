@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
 import { Camera, QrCode, AlertCircle } from 'lucide-react';
 
@@ -40,6 +40,51 @@ export default function QRScanner({ onScan, isActive, onError }: QRScannerProps)
     }
   }, [isActive, hasPermission, isInitializing]);
 
+
+  const initializeScanner = useCallback(async () => {
+    try {
+      // Add a small delay to ensure DOM is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0,
+        disableFlip: false,
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+        showTorchButtonIfSupported: true,
+        showZoomSliderIfSupported: true,
+        defaultZoomValueIfSupported: 2,
+        videoConstraints: {
+          facingMode: "environment" // Use back camera on mobile devices
+        }
+      };
+      const scanner = new Html5QrcodeScanner('qr-scanner-container', config, false);
+      scanner.render(
+        (decodedText) => {
+          // Success callback - automatically stop scanning after successful scan
+          console.log('QR Code detected:', decodedText);
+          onScan(decodedText);
+          setScannerError(null);
+        },
+        (error) => {
+          if (error.includes('NotFoundException') || error.includes('No MultiFormat Readers')) {
+            return;
+          }
+          console.warn('QR Scanner error:', error);
+        }
+      );
+      scannerRef.current = scanner;
+      setIsInitialized(true);
+      setScannerError(null);
+      console.log('QR Scanner initialized successfully');
+    } catch (error) {
+      console.error('Error initializing scanner:', error);
+      setScannerError('Failed to initialize camera scanner. Please check your camera connection.');
+      onError?.('Failed to initialize camera scanner');
+      initializationRef.current = false;
+    }
+  }, [onScan, onError]);
+
   useEffect(() => {
     if (!isActive) {
       // Clean up scanner and reset states when becoming inactive
@@ -76,60 +121,10 @@ export default function QRScanner({ onScan, isActive, onError }: QRScannerProps)
         scannerRef.current = null;
       }
     };
-  }, [isActive, hasPermission, isInitialized]);
+  }, [isActive, hasPermission, isInitialized, initializeScanner]);
 
-  const initializeScanner = async () => {
-    try {
-      // Add a small delay to ensure DOM is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      const config = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-        disableFlip: false,
-        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-        showTorchButtonIfSupported: true,
-        showZoomSliderIfSupported: true,
-        defaultZoomValueIfSupported: 2,
-        videoConstraints: {
-          facingMode: "environment" // Use back camera on mobile devices
-        }
-      };
 
-      const scanner = new Html5QrcodeScanner('qr-scanner-container', config, false);
-      
-      scanner.render(
-        (decodedText) => {
-          // Success callback - automatically stop scanning after successful scan
-          console.log('QR Code detected:', decodedText);
-          onScan(decodedText);
-          setScannerError(null);
-          
-          // Don't immediately clear the scanner, let the parent component handle it
-          // This prevents the camera from turning off immediately
-        },
-        (error) => {
-          // Error callback - this fires frequently during scanning, so we don't show all errors
-          if (error.includes('NotFoundException') || error.includes('No MultiFormat Readers')) {
-            // This is normal when no QR code is detected - don't log these
-            return;
-          }
-          console.warn('QR Scanner error:', error);
-        }
-      );
-
-      scannerRef.current = scanner;
-      setIsInitialized(true);
-      setScannerError(null);
-      console.log('QR Scanner initialized successfully');
-    } catch (error) {
-      console.error('Error initializing scanner:', error);
-      setScannerError('Failed to initialize camera scanner. Please check your camera connection.');
-      onError?.('Failed to initialize camera scanner');
-      initializationRef.current = false;
-    }
-  };
+  // (initializeScanner is now only defined with useCallback above)
 
   const handleManualInput = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -248,7 +243,7 @@ export default function QRScanner({ onScan, isActive, onError }: QRScannerProps)
           <div className="text-center text-gray-500">
             <QrCode className="w-20 h-20 mx-auto mb-4 text-gray-400" />
             <p className="font-medium text-lg">QR Scanner Ready</p>
-            <p className="text-sm">Click "Start Scanner" to activate camera</p>
+            <p className="text-sm">Click &quot;Start Scanner&quot; to activate camera</p>
           </div>
         </div>
       )}

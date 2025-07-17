@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authAPI.getCurrentUser();
       setUser(response.data.user);
-    } catch (error) {
+    } catch {
       localStorage.removeItem('token');
     } finally {
       setLoading(false);
@@ -38,8 +38,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       setUser(user);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Login failed');
+    } catch (error) {
+      let errorMsg = 'Login failed';
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        // @ts-expect-error: error type is unknown
+        errorMsg = error.response?.data?.error || errorMsg;
+      }
+      throw new Error(errorMsg);
     }
   };
 
@@ -49,8 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       setUser(user);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Registration failed');
+    } catch (error) {
+      let errorMsg = 'Registration failed';
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        // @ts-expect-error: error type is unknown
+        errorMsg = error.response?.data?.error || errorMsg;
+      }
+      throw new Error(errorMsg);
     }
   };
 

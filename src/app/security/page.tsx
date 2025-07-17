@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import type { ReactElement } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { scanAPI } from '@/lib/api';
@@ -41,52 +42,70 @@ export default function SecurityDashboard() {
   const handleQRScan = async (qrData: string) => {
     try {
       setLoading(true);
-      
+
       // First verify the QR code to see what action is needed
       const verifyResponse = await scanAPI.verifyQR(qrData);
-      
+
       if (!verifyResponse.data.valid) {
         addToast({
           title: 'Invalid QR Code',
           message: verifyResponse.data.message || 'QR code is not valid',
-          type: 'error'
+          type: 'error',
         });
         return;
       }
 
-      const { nextAction, currentStatus, visitRequest } = verifyResponse.data;
+      const { nextAction, currentStatus, visitRequest } = verifyResponse.data as {
+        nextAction: 'ENTRY' | 'EXIT';
+        currentStatus: string;
+        visitRequest: {
+          student: { name: string; roomNumber: string };
+        };
+      };
 
       // Show confirmation dialog with auto-detected action
       const confirmed = await showScanConfirmDialog(nextAction, currentStatus, visitRequest);
       if (!confirmed) return;
 
       // Record the scan with auto-detected type
-      const scanResponse = await scanAPI.recordScan(qrData, nextAction as 'ENTRY' | 'EXIT');
+      const scanResponse = await scanAPI.recordScan(qrData, nextAction);
 
       addToast({
         title: 'Scan Successful',
         message: scanResponse.data.message,
-        type: 'success'
+        type: 'success',
       });
 
       // Refresh data
       fetchData();
-      
+
       // Stop scanner after successful scan
       setScanning(false);
-      
-    } catch (error: any) {
+    } catch (error) {
+      let errorMsg = 'Failed to process scan';
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        // @ts-expect-error: error type is unknown
+        errorMsg = error.response?.data?.error || errorMsg;
+      }
       addToast({
         title: 'Scan Error',
-        message: error.response?.data?.error || 'Failed to process scan',
-        type: 'error'
+        message: errorMsg,
+        type: 'error',
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const showScanConfirmDialog = (nextAction: string, currentStatus: string, visitRequest: any): Promise<boolean> => {
+  interface VisitRequest {
+    student: { name: string; roomNumber: string };
+  }
+
+  const showScanConfirmDialog = (
+    nextAction: 'ENTRY' | 'EXIT',
+    currentStatus: string,
+    visitRequest: VisitRequest
+  ): Promise<boolean> => {
     return new Promise((resolve) => {
       const modal = document.createElement('div');
       modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
@@ -109,14 +128,14 @@ export default function SecurityDashboard() {
           </div>
         </div>
       `;
-      
+
       document.body.appendChild(modal);
-      
+
       modal.querySelector('#confirm-btn')?.addEventListener('click', () => {
         document.body.removeChild(modal);
         resolve(true);
       });
-      
+
       modal.querySelector('#cancel-btn')?.addEventListener('click', () => {
         document.body.removeChild(modal);
         resolve(false);
@@ -124,25 +143,25 @@ export default function SecurityDashboard() {
     });
   };
 
-  const getScanTypeIcon = (_scanType: string) => {
+  const getScanTypeIcon = (_scanType: string): ReactElement => {
     return <QrCode className="w-5 h-5 text-blue-500" />;
   };
 
-  const getScanTypeColor = (scanType: string) => {
-    return scanType === SCAN_TYPES.ENTRY ? 
-      'bg-green-100 text-green-800' : 
+  const getScanTypeColor = (scanType: string): string => {
+    return scanType === SCAN_TYPES.ENTRY ?
+      'bg-green-100 text-green-800' :
       'bg-red-100 text-red-800';
   };
 
-  const handleScannerError = (error: string) => {
+  const handleScannerError = (error: string): void => {
     addToast({
       title: 'Scanner Error',
       message: error,
-      type: 'error'
+      type: 'error',
     });
   };
 
-  const toggleScanner = () => {
+  const toggleScanner = (): void => {
     if (scanning) {
       // Immediately stop scanning
       setScanning(false);

@@ -16,8 +16,7 @@ import {
   AlertTriangle,
   Eye,
   Check,
-  X,
-  MessageSquare
+  X
 } from 'lucide-react';
 
 interface ApprovalModalProps {
@@ -172,7 +171,7 @@ function ApprovalModal({ request, isOpen, onClose, onApprove, onReject }: Approv
 }
 
 export default function WardenDashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { addToast } = useToast();
   const [visitRequests, setVisitRequests] = useState<VisitRequest[]>([]);
   const [pendingScannedVisits, setPendingScannedVisits] = useState<VisitRequest[]>([]);
@@ -183,7 +182,7 @@ export default function WardenDashboard() {
 
   useEffect(() => {
     fetchVisitRequests();
-  }, []);
+  }, []); // fetchVisitRequests is defined inline, so no need to add as dependency
 
   const fetchVisitRequests = async () => {
     try {
@@ -193,7 +192,7 @@ export default function WardenDashboard() {
       ]);
       setVisitRequests(allVisitsResponse.data.visitRequests || []);
       setPendingScannedVisits(pendingScansResponse.data.pendingScannedVisits || []);
-    } catch (error) {
+    } catch {
       addToast({
         title: 'Error',
         message: 'Failed to load visit requests',
@@ -216,10 +215,14 @@ export default function WardenDashboard() {
         type: 'success'
       });
       fetchVisitRequests();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let message = 'Failed to approve request';
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data) {
+        message = (error.response.data as { error?: string }).error || message;
+      }
       addToast({
         title: 'Error',
-        message: error.response?.data?.error || 'Failed to approve request',
+        message,
         type: 'error'
       });
     }
@@ -237,10 +240,14 @@ export default function WardenDashboard() {
         type: 'success'
       });
       fetchVisitRequests();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let message = 'Failed to reject request';
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+        message = (error.response.data as { message?: string }).message || message;
+      }
       addToast({
         title: 'Error',
-        message: error.response?.data?.message || 'Failed to reject request',
+        message,
         type: 'error'
       });
     }

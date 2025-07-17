@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
       whereClause.status = status;
     }
 
+
     const visitRequests = await prisma.visitRequest.findMany({
       where: whereClause,
       include: {
@@ -119,11 +120,12 @@ export async function POST(request: NextRequest) {
       purpose, 
       validFrom, 
       validUntil 
+
     } = await request.json();
 
     if (!studentName || !rollNumber || !hostelName || !validFrom || !validUntil) {
       return NextResponse.json(
-        { error: 'Student name, roll number, hostel name, valid from, and valid until are required' },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -158,7 +160,7 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Update existing student record with new information if provided
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       if (rollNumber && student.rollNumber !== rollNumber) updateData.rollNumber = rollNumber;
       if (roomNumber && student.roomNumber !== roomNumber) updateData.roomNumber = roomNumber;
       if (degree && student.course !== degree) updateData.course = degree;

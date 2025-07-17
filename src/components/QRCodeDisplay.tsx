@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import QRCode from 'qrcode';
 import { Download, X } from 'lucide-react';
 
@@ -23,15 +23,9 @@ export default function QRCodeDisplay({
 }: QRCodeDisplayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    if (isOpen && qrCodeData && canvasRef.current) {
-      generateQRCode();
-    }
-  }, [isOpen, qrCodeData]);
 
-  const generateQRCode = async () => {
+  const generateQRCode = useCallback(async () => {
     if (!canvasRef.current) return;
-    
     try {
       await QRCode.toCanvas(canvasRef.current, qrCodeData, {
         width: 300,
@@ -44,7 +38,13 @@ export default function QRCodeDisplay({
     } catch (error) {
       console.error('Error generating QR code:', error);
     }
-  };
+  }, [qrCodeData]);
+
+  useEffect(() => {
+    if (isOpen && qrCodeData && canvasRef.current) {
+      generateQRCode();
+    }
+  }, [isOpen, qrCodeData, generateQRCode]);
 
   const downloadQRCode = () => {
     if (!canvasRef.current) return;

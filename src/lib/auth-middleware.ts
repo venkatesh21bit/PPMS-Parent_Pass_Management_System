@@ -20,7 +20,7 @@ export async function authenticate(request: NextRequest) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; email: string; role: string };
     return { user: decoded, error: null };
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Invalid token' },
       { status: 401 }

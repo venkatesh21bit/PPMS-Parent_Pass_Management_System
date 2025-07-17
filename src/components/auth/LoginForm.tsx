@@ -39,11 +39,15 @@ export default function LoginForm() {
           message: 'Your account has been created!',
         });
       }
-    } catch (error: any) {
+    } catch (error) {
+      let errorMsg = 'An error occurred.';
+      if (typeof error === 'object' && error !== null && 'message' in error && typeof (error as any).message === 'string') {
+        errorMsg = (error as any).message;
+      }
       addToast({
         type: 'error',
         title: isLogin ? 'Login failed' : 'Registration failed',
-        message: error.message,
+        message: errorMsg,
       });
     } finally {
       setLoading(false);
