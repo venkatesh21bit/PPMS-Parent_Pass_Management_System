@@ -11,9 +11,9 @@ async function authenticate(request: NextRequest) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
