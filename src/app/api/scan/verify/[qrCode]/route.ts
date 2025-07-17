@@ -20,7 +20,7 @@ async function authenticate(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  context: any
+  context: unknown
 ) {
   try {
     // Authenticate user
@@ -32,7 +32,17 @@ export async function GET(
       );
     }
 
-    const { qrCode } = context.params;
+    let qrCode: string | undefined;
+    if (
+      context &&
+      typeof context === 'object' &&
+      'params' in context &&
+      (context as { params?: unknown }).params &&
+      typeof (context as { params: unknown }).params === 'object' &&
+      'qrCode' in (context as { params: { qrCode?: unknown } }).params
+    ) {
+      qrCode = ((context as { params: { qrCode?: unknown } }).params.qrCode) as string;
+    }
 
     if (!qrCode) {
       return NextResponse.json(
