@@ -24,7 +24,6 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Authenticate user
     const user = await authenticate(request);
     if (!user) {
       return NextResponse.json(
@@ -79,7 +78,7 @@ export async function GET(
       visitRequest
     });
   } catch (error) {
-    console.error('Get visit request error:', error);
+      console.error('Get visit request error:');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

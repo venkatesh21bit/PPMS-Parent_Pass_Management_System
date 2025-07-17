@@ -1,8 +1,9 @@
 'use client';
 
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
-import { VisitRequest } from '@/types';
+import { VisitRequest, ScanLog } from '@/types';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { VISIT_STATUS } from '@/lib/constants';
@@ -10,20 +11,11 @@ import NewVisitForm from '@/components/NewVisitForm';
 import QRCodeDisplay from '@/components/QRCodeDisplay';
 import ModernHeader from '@/components/ModernHeader';
 import { ModernCard, StatsCard } from '@/components/ModernCard';
-import { 
-  Calendar, 
-  Clock, 
-  QrCode, 
-  User, 
-  Plus, 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle,
-  Eye 
-} from 'lucide-react';
+import { Calendar, QrCode, Plus, CheckCircle, XCircle, AlertCircle, Eye, Clock } from 'lucide-react';
+
 
 export default function ParentDashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { addToast } = useToast();
   const [visitRequests, setVisitRequests] = useState<VisitRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,11 +24,7 @@ export default function ParentDashboard() {
   const [showQRCode, setShowQRCode] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       const visitsResponse = await api.get('/visits');
       setVisitRequests(visitsResponse.data.visitRequests || visitsResponse.data);
@@ -49,7 +37,11 @@ export default function ParentDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [addToast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -90,10 +82,10 @@ export default function ParentDashboard() {
         type: 'success'
       });
       fetchData(); // Refresh the list
-    } catch (error: any) {
+    } catch (error) {
       addToast({
         title: 'Error',
-        message: error.response?.data?.error || 'Failed to delete visit request',
+        message: (error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to delete visit request',
         type: 'error'
       });
     }
@@ -217,7 +209,7 @@ export default function ParentDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {request.qrCode ? (
                         <button 
-                          className={`${
+                          className={`$
                             request.status === 'APPROVED' 
                               ? 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
                               : request.status === 'REJECTED'
@@ -356,7 +348,7 @@ export default function ParentDashboard() {
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Scan History</h3>
                   <div className="space-y-2">
-                    {selectedQRRequest.scanLogs.map((scan: any, index: number) => (
+                    {selectedQRRequest.scanLogs.map((scan: ScanLog, index: number) => (
                       <div key={index} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
                         <span className="text-sm text-gray-900 dark:text-white">
                           {scan.scanType} by {scan.scanner?.name}

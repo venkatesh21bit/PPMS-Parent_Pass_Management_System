@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+
     // Check if user is SECURITY
     if (user.role !== 'SECURITY') {
       return NextResponse.json(
