@@ -44,19 +44,48 @@ api.interceptors.response.use(
 export default api;
 
 // Utility functions for common API calls
+import type { User, VisitRequest, ScanLog, Student } from '@/types';
+
+interface RegisterPayload {
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+}
+
+interface VisitParams {
+  status?: string;
+  studentId?: string;
+}
+
+interface ScanLogParams {
+  date?: string;
+  visitRequestId?: string;
+}
+
+interface StudentPayload {
+  name: string;
+  rollNumber: string;
+  course: string;
+  branch: string;
+  year: number;
+  hostelName: string;
+  roomNumber?: string;
+}
+
 export const authAPI = {
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
-  register: (userData: any) =>
+  register: (userData: RegisterPayload) =>
     api.post('/auth/register', userData),
   getCurrentUser: () =>
     api.get('/auth/me'),
 };
 
 export const visitAPI = {
-  createVisit: (visitData: any) =>
+  createVisit: (visitData: VisitRequest) =>
     api.post('/visits', visitData),
-  getVisits: (params?: any) =>
+  getVisits: (params?: VisitParams) =>
     api.get('/visits', { params }),
   getVisitById: (id: string) =>
     api.get(`/visits/${id}`),
@@ -71,7 +100,7 @@ export const scanAPI = {
     api.post('/scan/record', { qrCode, scanType, location, remarks }),
   verifyQR: (qrCode: string) =>
     api.get(`/scan/verify/${qrCode}`),
-  getScanLogs: (params?: any) =>
+  getScanLogs: (params?: ScanLogParams) =>
     api.get('/scan/logs', { params }),
 };
 
@@ -80,7 +109,7 @@ export const studentAPI = {
     api.get('/students'),
   searchStudents: (query: string) =>
     api.get('/students/search', { params: { q: query } }),
-  createStudent: (studentData: any) =>
+  createStudent: (studentData: StudentPayload) =>
     api.post('/students', studentData),
   getStudentById: (id: string) =>
     api.get(`/students/${id}`),

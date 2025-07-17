@@ -11,16 +11,14 @@ export interface AuthenticatedRequest extends NextRequest {
 
 export async function authenticate(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
-  
   if (!token) {
     return NextResponse.json(
       { error: 'No token provided' },
       { status: 401 }
     );
   }
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; email: string; role: string };
     return { user: decoded, error: null };
   } catch (error) {
     return NextResponse.json(
@@ -31,7 +29,7 @@ export async function authenticate(request: NextRequest) {
 }
 
 export function requireRole(allowedRoles: string[]) {
-  return (user: any) => {
+  return (user: { role: string }) => {
     if (!allowedRoles.includes(user.role)) {
       return NextResponse.json(
         { error: 'Insufficient permissions' },

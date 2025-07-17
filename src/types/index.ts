@@ -70,7 +70,7 @@ export interface ScanLog {
   visitRequest?: VisitRequest;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   message?: string;
   error?: string;
   data?: T;
