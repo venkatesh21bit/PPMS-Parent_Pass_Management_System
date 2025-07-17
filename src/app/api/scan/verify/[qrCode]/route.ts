@@ -18,9 +18,10 @@ async function authenticate(request: NextRequest) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GET(
   request: NextRequest,
-  context: { params: { qrCode: string } }
+  context: any
 ) {
   try {
     // Authenticate user
