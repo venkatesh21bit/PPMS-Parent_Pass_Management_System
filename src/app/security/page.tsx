@@ -23,16 +23,12 @@ import ThemeToggle from '@/components/ThemeToggle';
 import ModernHeader from '@/components/ModernHeader';
 
 export default function SecurityDashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { addToast } = useToast();
   const [scanLogs, setScanLogs] = useState<ScanLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [recentScans, setRecentScans] = useState<ScanLog[]>([]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const fetchData = async () => {
     try {
@@ -49,6 +45,10 @@ export default function SecurityDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleQRScan = async (qrData: string) => {
     try {

@@ -44,7 +44,7 @@ api.interceptors.response.use(
 export default api;
 
 // Utility functions for common API calls
-import type { User, VisitRequest, ScanLog, Student } from '@/types';
+import type { VisitRequest } from '@/types';
 
 interface RegisterPayload {
   email: string;
