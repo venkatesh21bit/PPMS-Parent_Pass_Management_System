@@ -1,52 +1,48 @@
-# Parent Transport Management System
 
-A comprehensive full-stack application for managing parent visits to college hostels with QR code scanning and approval workflow.
+# Parent Hostel Pass Management System
+
+A modern full-stack web application for managing parent visits to college hostels, featuring a seamless QR code-based entry/exit workflow, real-time approvals, and a unified monorepo using Next.js API routes (no separate backend server required).
+
 
 ## Features
 
 ### 🏠 Parent Portal
-- Register visit requests with student details
-- Generate QR codes for approved visits
-- Track visit status and history
-- Vehicle registration support
+- Register visit requests for parents
+- Instantly generate QR codes for each request
+- Track visit status, scan history, and approvals
+- View and delete visit requests
 
 ### 🔒 Security Portal
-- Scan QR codes for entry/exit
-- Real-time visit verification
-- Timestamp tracking
-- Invalid code detection
+- Scan QR codes for entry and exit (auto-detects action)
+- Entry allowed before approval, exit only after warden approval
+- Real-time verification and error feedback
+- View recent and full scan history
 
 ### 👮 Warden Portal
-- Approve/reject visit requests
-- Monitor hostel-specific visits
-- Real-time notifications
-- Visit history and analytics
+- Approve or reject visit requests after entry scan
+- Monitor all hostel visit activity
+- View visit and scan history
+- Consistent, modern UI across all portals
+
 
 ## Tech Stack
 
-### Frontend
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type safety
-- **TailwindCSS** - Styling
-- **Lucide React** - Icons
-- **Axios** - HTTP client
-- **Socket.io Client** - Real-time communication
-
-### Backend
-- **Express.js** - Node.js framework
-- **TypeScript** - Type safety
-- **Prisma ORM** - Database management
-- **SQLite** - Database (development)
-- **Socket.io** - Real-time communication
-- **JWT** - Authentication
-- **bcryptjs** - Password hashing
-- **QRCode** - QR code generation
+- **Next.js 14** (App Router, API Routes)
+- **TypeScript**
+- **TailwindCSS**
+- **Prisma ORM** (with SQLite for dev)
+- **JWT** authentication
+- **bcryptjs** for password hashing
+- **QRCode** for QR code generation
+- **Lucide React** for icons
+- **Axios** for HTTP requests
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js 18+ and npm
 - Git
+
 
 ### Installation
 
@@ -56,39 +52,26 @@ A comprehensive full-stack application for managing parent visits to college hos
    cd parent_transport_management_system
    ```
 
-2. **Install frontend dependencies**
+2. **Install dependencies**
    ```bash
    npm install --legacy-peer-deps
    ```
 
-3. **Install backend dependencies**
+3. **Set up the database**
    ```bash
-   cd backend
-   npm install
-   ```
-
-4. **Set up the database**
-   ```bash
-   # In the backend directory
    npx prisma generate
    npx prisma migrate dev --name init
-   npx ts-node src/seed.ts
+   # (Optional) Seed data if a seed script is provided
    ```
+
 
 ### Running the Application
 
-1. **Start the backend server**
-   ```bash
-   cd backend
-   npm run dev
-   ```
-   The backend will run on http://localhost:5000
-
-2. **Start the frontend (in a new terminal)**
-   ```bash
-   npm run dev
-   ```
-   The frontend will run on http://localhost:3000
+Just start the Next.js app (API and frontend are unified):
+```bash
+npm run dev
+```
+The app will run on http://localhost:3000
 
 ## Demo Credentials
 
@@ -98,30 +81,26 @@ Use these credentials to test the application:
 - **Security**: security@example.com / security123
 - **Warden**: warden@example.com / warden123
 
+
 ## Workflow
 
-1. **Parent Registration**: Parents create visit requests with student details
-2. **QR Code Generation**: System generates unique QR codes for requests
-3. **Warden Approval**: Wardens review and approve/reject requests
-4. **Security Scanning**: Security scans QR codes for entry/exit
-5. **Real-time Updates**: All parties receive live notifications
+1. **Parent Registration**: Parent creates a visit request for a student
+2. **Entry Scan**: Security scans QR code for entry (no approval needed)
+3. **Warden Approval**: Warden reviews and approves/rejects after entry
+4. **Exit Scan**: Security scans QR code for exit (approval required)
+5. **Tracking**: All actions and scans are tracked and visible in the portals
+
 
 ## Project Structure
 
 ```
 parent_transport_management_system/
-├── src/                          # Frontend (Next.js)
-│   ├── app/                      # App router pages
-│   ├── components/               # React components
-│   ├── contexts/                 # React contexts
-│   └── lib/                      # Utilities
-├── backend/                      # Backend (Express.js)
-│   ├── src/
-│   │   ├── routes/              # API routes
-│   │   ├── middleware/          # Express middleware
-│   │   ├── controllers/         # Route controllers
-│   │   └── utils/               # Utilities
-│   └── prisma/                  # Database schema
+├── src/                # Next.js app (frontend + API routes)
+│   ├── app/            # App router pages & API endpoints
+│   ├── components/     # React components
+│   ├── contexts/       # React contexts
+│   └── lib/            # Utilities (API, Prisma, etc.)
+├── prisma/             # Database schema
 └── README.md
 ```
 
@@ -138,9 +117,10 @@ parent_transport_management_system/
 - `GET /api/visits/:id` - Get specific visit request
 - `POST /api/visits/:id/approve` - Approve/reject request
 
+
 ### Scanning
-- `POST /api/scan/scan` - Scan QR code
-- `GET /api/scan/verify/:qrCode` - Verify QR code
+- `POST /api/scan/record` - Record a scan (auto-detects entry/exit)
+- `GET /api/scan/verify/:qrCode` - Verify QR code and get next action
 - `GET /api/scan/logs` - Get scan logs
 
 ### Students
