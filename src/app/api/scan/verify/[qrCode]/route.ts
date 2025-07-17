@@ -20,7 +20,7 @@ async function authenticate(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  context: Record<string, any>
+  context: { params: { qrCode: string } }
 ) {
   try {
     // Authenticate user
