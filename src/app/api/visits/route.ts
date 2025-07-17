@@ -12,9 +12,9 @@ async function authenticate(request: NextRequest) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const hostelName = searchParams.get('hostelName');
 
-    let whereClause: any = {};
+  const whereClause: Record<string, unknown> = {};
 
     // Filter based on user role
     if (user.role === 'PARENT') {
