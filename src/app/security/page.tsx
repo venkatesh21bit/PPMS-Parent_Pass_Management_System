@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import { ScanLog, VisitRequest } from '@/types';
-import api from '@/lib/api';
+import api, { scanAPI } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { SCAN_TYPES, VISIT_STATUS } from '@/lib/constants';
 import { 
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import QRScanner from '@/components/QRScanner';
 import ThemeToggle from '@/components/ThemeToggle';
+import ModernHeader from '@/components/ModernHeader';
 
 export default function SecurityDashboard() {
   const { user, logout } = useAuth();
@@ -35,7 +36,7 @@ export default function SecurityDashboard() {
 
   const fetchData = async () => {
     try {
-      const response = await api.get('/scan/logs');
+      const response = await scanAPI.getScanLogs();
       setScanLogs(response.data.scanLogs || []);
       setRecentScans((response.data.scanLogs || []).slice(0, 5)); // Get 5 most recent
     } catch (error) {
@@ -53,10 +54,8 @@ export default function SecurityDashboard() {
     try {
       setLoading(true);
       
-      // First verify the QR code
-      const verifyResponse = await api.post('/scan/verify', { 
-        qrCode: qrData 
-      });
+      // First verify the QR code to see what action is needed
+      const verifyResponse = await scanAPI.verifyQR(qrData);
       
       if (!verifyResponse.data.valid) {
         addToast({
@@ -67,23 +66,19 @@ export default function SecurityDashboard() {
         return;
       }
 
-      // Show scan type selection
-      const scanType = await showScanTypeDialog();
-      if (!scanType) return;
+      const { nextAction, currentStatus, visitRequest } = verifyResponse.data;
 
-      // Record the scan
-      const scanResponse = await api.post('/scan/record', {
-        qrCode: qrData,
-        scanType,
-        location: 'Main Gate' // Default location
-      });
+      // Show confirmation dialog with auto-detected action
+      const confirmed = await showScanConfirmDialog(nextAction, currentStatus, visitRequest);
+      if (!confirmed) return;
+
+      // Record the scan with auto-detected type
+      const scanResponse = await scanAPI.recordScan(qrData, nextAction as 'ENTRY' | 'EXIT');
 
       addToast({
         title: 'Scan Successful',
-        message: scanResponse.data.status === 'PENDING_APPROVAL' 
-          ? 'Entry scan recorded. Waiting for warden approval.'
-          : `${scanType} scan recorded successfully`,
-        type: scanResponse.data.status === 'PENDING_APPROVAL' ? 'warning' : 'success'
+        message: scanResponse.data.message,
+        type: 'success'
       });
 
       // Refresh data
@@ -95,7 +90,7 @@ export default function SecurityDashboard() {
     } catch (error: any) {
       addToast({
         title: 'Scan Error',
-        message: error.response?.data?.message || 'Failed to process scan',
+        message: error.response?.data?.error || 'Failed to process scan',
         type: 'error'
       });
     } finally {
@@ -103,21 +98,24 @@ export default function SecurityDashboard() {
     }
   };
 
-  const showScanTypeDialog = (): Promise<string | null> => {
+  const showScanConfirmDialog = (nextAction: string, currentStatus: string, visitRequest: any): Promise<boolean> => {
     return new Promise((resolve) => {
       const modal = document.createElement('div');
       modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
       modal.innerHTML = `
-        <div class="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
-          <h3 class="text-lg font-semibold mb-4">Select Scan Type</h3>
-          <div class="space-y-3">
-            <button id="entry-btn" class="w-full p-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
-              Entry Scan
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+          <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Confirm Scan</h3>
+          <div class="space-y-3 mb-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Student:</strong> ${visitRequest.student.name}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Room:</strong> ${visitRequest.student.roomNumber}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Current Status:</strong> ${currentStatus}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Action:</strong> Record ${nextAction.toLowerCase()}</p>
+          </div>
+          <div class="flex space-x-3">
+            <button id="confirm-btn" class="flex-1 p-3 ${nextAction === 'ENTRY' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white rounded-lg">
+              Confirm ${nextAction.toLowerCase()}
             </button>
-            <button id="exit-btn" class="w-full p-3 bg-red-600 text-white rounded-lg hover:bg-red-700">
-              Exit Scan
-            </button>
-            <button id="cancel-btn" class="w-full p-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+            <button id="cancel-btn" class="flex-1 p-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">
               Cancel
             </button>
           </div>
@@ -126,29 +124,20 @@ export default function SecurityDashboard() {
       
       document.body.appendChild(modal);
       
-      modal.querySelector('#entry-btn')?.addEventListener('click', () => {
+      modal.querySelector('#confirm-btn')?.addEventListener('click', () => {
         document.body.removeChild(modal);
-        resolve(SCAN_TYPES.ENTRY);
-      });
-      
-      modal.querySelector('#exit-btn')?.addEventListener('click', () => {
-        document.body.removeChild(modal);
-        resolve(SCAN_TYPES.EXIT);
+        resolve(true);
       });
       
       modal.querySelector('#cancel-btn')?.addEventListener('click', () => {
         document.body.removeChild(modal);
-        resolve(null);
+        resolve(false);
       });
     });
   };
 
-  const getScanTypeIcon = (scanType: string) => {
-    return scanType === SCAN_TYPES.ENTRY ? (
-      <CheckCircle className="w-5 h-5 text-green-500" />
-    ) : (
-      <XCircle className="w-5 h-5 text-red-500" />
-    );
+  const getScanTypeIcon = (_scanType: string) => {
+    return <QrCode className="w-5 h-5 text-blue-500" />;
   };
 
   const getScanTypeColor = (scanType: string) => {
@@ -185,38 +174,25 @@ export default function SecurityDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Security Portal</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Welcome back, {user?.name}</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={toggleScanner}
-                disabled={loading}
-                className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  scanning 
-                    ? 'bg-red-600 text-white hover:bg-red-700' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                {scanning ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                <span>{scanning ? 'Stop Scanner' : 'Start Scanner'}</span>
-              </button>
-              <ThemeToggle />
-              <button
-                onClick={logout}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* ModernHeader for consistent UI */}
+      <ModernHeader
+        title="Security Portal"
+        subtitle={user ? `Welcome back, ${user.name}` : ''}
+        actions={
+          <button
+            onClick={toggleScanner}
+            disabled={loading}
+            className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              scanning 
+                ? 'bg-red-600 text-white hover:bg-red-700' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {scanning ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            <span>{scanning ? 'Stop Scanner' : 'Start Scanner'}</span>
+          </button>
+        }
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

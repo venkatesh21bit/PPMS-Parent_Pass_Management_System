@@ -6,6 +6,7 @@ import { VisitRequest, Approval } from '@/types';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import { VISIT_STATUS } from '@/lib/constants';
+import ModernHeader from '@/components/ModernHeader';
 import { 
   CheckCircle, 
   XCircle, 
@@ -18,7 +19,6 @@ import {
   X,
   MessageSquare
 } from 'lucide-react';
-import ThemeToggle from '@/components/ThemeToggle';
 
 interface ApprovalModalProps {
   request: VisitRequest | null;
@@ -188,10 +188,10 @@ export default function WardenDashboard() {
   const fetchVisitRequests = async () => {
     try {
       const [allVisitsResponse, pendingScansResponse] = await Promise.all([
-        api.get('/visits/all'),
+        api.get('/visits'),
         api.get('/visits/pending-scans')
       ]);
-      setVisitRequests(allVisitsResponse.data);
+      setVisitRequests(allVisitsResponse.data.visitRequests || []);
       setPendingScannedVisits(pendingScansResponse.data.pendingScannedVisits || []);
     } catch (error) {
       addToast({
@@ -206,7 +206,10 @@ export default function WardenDashboard() {
 
   const handleApprove = async (requestId: string, comments?: string) => {
     try {
-      await api.post(`/visits/${requestId}/approve`, { comments });
+      await api.post(`/visits/${requestId}/approve`, { 
+        status: true, 
+        remarks: comments 
+      });
       addToast({
         title: 'Success',
         message: 'Visit request approved successfully',
@@ -216,7 +219,7 @@ export default function WardenDashboard() {
     } catch (error: any) {
       addToast({
         title: 'Error',
-        message: error.response?.data?.message || 'Failed to approve request',
+        message: error.response?.data?.error || 'Failed to approve request',
         type: 'error'
       });
     }
@@ -224,7 +227,10 @@ export default function WardenDashboard() {
 
   const handleReject = async (requestId: string, comments: string) => {
     try {
-      await api.post(`/visits/${requestId}/reject`, { comments });
+      await api.post(`/visits/${requestId}/approve`, { 
+        status: false, 
+        remarks: comments 
+      });
       addToast({
         title: 'Success',
         message: 'Visit request rejected',
@@ -287,26 +293,11 @@ export default function WardenDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Warden Portal</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Welcome back, {user?.name}</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <ThemeToggle />
-              <button
-                onClick={logout}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Modern Header */}
+      <ModernHeader
+        title="Warden Portal"
+        subtitle={`Welcome back, ${user?.name}`}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}

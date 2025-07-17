@@ -30,6 +30,7 @@ export default function ParentDashboard() {
   const [showNewVisitForm, setShowNewVisitForm] = useState(false);
   const [selectedQRRequest, setSelectedQRRequest] = useState<VisitRequest | null>(null);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -73,6 +74,28 @@ export default function ParentDashboard() {
         return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+    if (!confirm('Are you sure you want to delete this visit request? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/visits/${requestId}`);
+      addToast({
+        title: 'Success',
+        message: 'Visit request deleted successfully',
+        type: 'success'
+      });
+      fetchData(); // Refresh the list
+    } catch (error: any) {
+      addToast({
+        title: 'Error',
+        message: error.response?.data?.error || 'Failed to delete visit request',
+        type: 'error'
+      });
     }
   };
 
@@ -214,10 +237,27 @@ export default function ParentDashboard() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center space-x-1">
-                        <Eye className="w-4 h-4" />
-                        <span>View</span>
-                      </button>
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => {
+                            setSelectedQRRequest(request);
+                            setShowModal(true);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center space-x-1"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>View</span>
+                        </button>
+                        {(request.status === 'PENDING' && (!request.scanLogs || request.scanLogs.length === 0)) && (
+                          <button 
+                            onClick={() => handleDeleteRequest(request.id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 flex items-center space-x-1"
+                          >
+                            <XCircle className="w-4 h-4" />
+                            <span>Delete</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -247,6 +287,103 @@ export default function ParentDashboard() {
             setSelectedQRRequest(null);
           }}
         />
+      )}
+
+      {/* View Request Details Modal */}
+      {selectedQRRequest && showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Visit Request Details</h2>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Request Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Student Name</label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{selectedQRRequest.student?.name}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Room Number</label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{selectedQRRequest.student?.roomNumber}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{selectedQRRequest.student?.course}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Branch</label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{selectedQRRequest.student?.branch}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Visit Date</label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {new Date(selectedQRRequest.validFrom).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Valid Until</label>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {new Date(selectedQRRequest.validUntil).toLocaleString()}
+                  </p>
+                </div>
+                {selectedQRRequest.vehicleNo && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Vehicle Number</label>
+                    <p className="mt-1 text-sm text-gray-900 dark:text-white">{selectedQRRequest.vehicleNo}</p>
+                  </div>
+                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                  <div className="mt-1 flex items-center space-x-2">
+                    {getStatusIcon(selectedQRRequest.status)}
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(selectedQRRequest.status)}`}>
+                      {selectedQRRequest.status}
+                    </span>
+                  </div>
+                </div>
+                {selectedQRRequest.purpose && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Purpose</label>
+                    <p className="mt-1 text-sm text-gray-900 dark:text-white">{selectedQRRequest.purpose}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Scan History */}
+              {selectedQRRequest.scanLogs && selectedQRRequest.scanLogs.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Scan History</h3>
+                  <div className="space-y-2">
+                    {selectedQRRequest.scanLogs.map((scan: any, index: number) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                        <span className="text-sm text-gray-900 dark:text-white">
+                          {scan.scanType} by {scan.scanner?.name}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(scan.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setSelectedQRRequest(null);
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

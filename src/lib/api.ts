@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -46,40 +46,42 @@ export default api;
 // Utility functions for common API calls
 export const authAPI = {
   login: (email: string, password: string) =>
-    api.post('/api/auth/login', { email, password }),
+    api.post('/auth/login', { email, password }),
   register: (userData: any) =>
-    api.post('/api/auth/register', userData),
+    api.post('/auth/register', userData),
   getCurrentUser: () =>
-    api.get('/api/auth/me'),
+    api.get('/auth/me'),
 };
 
 export const visitAPI = {
   createVisit: (visitData: any) =>
-    api.post('/api/visits', visitData),
+    api.post('/visits', visitData),
   getVisits: (params?: any) =>
-    api.get('/api/visits', { params }),
+    api.get('/visits', { params }),
   getVisitById: (id: string) =>
-    api.get(`/api/visits/${id}`),
+    api.get(`/visits/${id}`),
   approveVisit: (id: string, status: boolean, remarks?: string) =>
-    api.post(`/api/visits/${id}/approve`, { status, remarks }),
+    api.post(`/visits/${id}/approve`, { status, remarks }),
 };
 
 export const scanAPI = {
   scanQR: (qrCode: string, scanType: 'ENTRY' | 'EXIT', location?: string, remarks?: string) =>
-    api.post('/api/scan/scan', { qrCode, scanType, location, remarks }),
+    api.post('/scan/scan', { qrCode, scanType, location, remarks }),
+  recordScan: (qrCode: string, scanType: 'ENTRY' | 'EXIT', location?: string, remarks?: string) =>
+    api.post('/scan/record', { qrCode, scanType, location, remarks }),
   verifyQR: (qrCode: string) =>
-    api.get(`/api/scan/verify/${qrCode}`),
+    api.get(`/scan/verify/${qrCode}`),
   getScanLogs: (params?: any) =>
-    api.get('/api/scan/logs', { params }),
+    api.get('/scan/logs', { params }),
 };
 
 export const studentAPI = {
   getStudents: () =>
-    api.get('/api/students'),
+    api.get('/students'),
   searchStudents: (query: string) =>
-    api.get('/api/students/search', { params: { q: query } }),
+    api.get('/students/search', { params: { q: query } }),
   createStudent: (studentData: any) =>
-    api.post('/api/students', studentData),
+    api.post('/students', studentData),
   getStudentById: (id: string) =>
-    api.get(`/api/students/${id}`),
+    api.get(`/students/${id}`),
 };
