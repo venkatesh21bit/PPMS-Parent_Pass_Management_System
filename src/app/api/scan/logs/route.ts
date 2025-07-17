@@ -56,8 +56,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ scanLogs });
-  } catch (error) {
-    console.error('Get scan logs error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
