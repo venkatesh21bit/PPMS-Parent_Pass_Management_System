@@ -403,7 +403,7 @@ export default function WardenDashboard() {
                 ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setFilter(tab.key as any)}
+                  onClick={() => setFilter(tab.key as 'all' | 'pending' | 'approved' | 'rejected' | 'pending-scans')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                     filter === tab.key
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
