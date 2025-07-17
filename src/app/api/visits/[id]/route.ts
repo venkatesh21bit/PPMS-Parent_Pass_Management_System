@@ -21,7 +21,7 @@ async function authenticate(request: NextRequest) {
 // GET /api/visits/[id] - Get individual visit request
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: unknown
 ) {
   try {
     const user = await authenticate(request);
@@ -32,7 +32,23 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    let id: string | undefined;
+    if (
+      context &&
+      typeof context === 'object' &&
+      'params' in context &&
+      (context as { params?: unknown }).params &&
+      typeof (context as { params: unknown }).params === 'object' &&
+      'id' in (context as { params: { id?: unknown } }).params
+    ) {
+      id = ((context as { params: { id?: unknown } }).params.id) as string;
+    }
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Visit request id is required' },
+        { status: 400 }
+      );
+    }
 
     const visitRequest = await prisma.visitRequest.findUnique({
       where: { id },
@@ -89,7 +105,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: unknown
 ) {
   try {
     // Authenticate user
@@ -101,7 +117,23 @@ export async function DELETE(
       );
     }
 
-    const { id } = params;
+    let id: string | undefined;
+    if (
+      context &&
+      typeof context === 'object' &&
+      'params' in context &&
+      (context as { params?: unknown }).params &&
+      typeof (context as { params: unknown }).params === 'object' &&
+      'id' in (context as { params: { id?: unknown } }).params
+    ) {
+      id = ((context as { params: { id?: unknown } }).params.id) as string;
+    }
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Visit request id is required' },
+        { status: 400 }
+      );
+    }
 
     // Find the visit request
     const visitRequest = await prisma.visitRequest.findUnique({
