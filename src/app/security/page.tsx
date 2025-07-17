@@ -1,26 +1,14 @@
 'use client';
 
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useState, useRef } from 'react';
-import { ScanLog, VisitRequest } from '@/types';
-import api, { scanAPI } from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
-import { SCAN_TYPES, VISIT_STATUS } from '@/lib/constants';
-import { 
-  QrCode, 
-  Camera, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  User, 
-  Calendar,
-  AlertTriangle,
-  Play,
-  Square
-} from 'lucide-react';
-import QRScanner from '@/components/QRScanner';
-import ThemeToggle from '@/components/ThemeToggle';
+import { scanAPI } from '@/lib/api';
 import ModernHeader from '@/components/ModernHeader';
+import { ScanLog } from '@/types';
+import { SCAN_TYPES } from '@/lib/constants';
+import { QrCode, CheckCircle, Square, Play } from 'lucide-react';
+import QRScanner from '@/components/QRScanner';
 
 export default function SecurityDashboard() {
   const { user } = useAuth();
@@ -30,12 +18,12 @@ export default function SecurityDashboard() {
   const [scanning, setScanning] = useState(false);
   const [recentScans, setRecentScans] = useState<ScanLog[]>([]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const response = await scanAPI.getScanLogs();
       setScanLogs(response.data.scanLogs || []);
-      setRecentScans((response.data.scanLogs || []).slice(0, 5)); // Get 5 most recent
-    } catch (error) {
+      setRecentScans((response.data.scanLogs || []).slice(0, 5));
+    } catch {
       addToast({
         title: 'Error',
         message: 'Failed to load scan logs',
@@ -44,7 +32,7 @@ export default function SecurityDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [addToast]);
 
   useEffect(() => {
     fetchData();

@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useState } from 'react';
 import { VisitRequest, ScanLog } from '@/types';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
@@ -24,11 +23,11 @@ export default function ParentDashboard() {
   const [showQRCode, setShowQRCode] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const fetchData = React.useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       const visitsResponse = await api.get('/visits');
       setVisitRequests(visitsResponse.data.visitRequests || visitsResponse.data);
-    } catch (error) {
+    } catch {
       addToast({
         title: 'Error',
         message: 'Failed to load data',
@@ -82,10 +81,10 @@ export default function ParentDashboard() {
         type: 'success'
       });
       fetchData(); // Refresh the list
-    } catch (error) {
+    } catch {
       addToast({
         title: 'Error',
-        message: (error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to delete visit request',
+        message: 'Failed to delete visit request',
         type: 'error'
       });
     }
