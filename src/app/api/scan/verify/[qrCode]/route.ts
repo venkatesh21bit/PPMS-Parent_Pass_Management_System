@@ -20,7 +20,7 @@ async function authenticate(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { qrCode: string } }
+  context: { params: { qrCode: string } }
 ) {
   try {
     // Authenticate user
@@ -32,7 +32,7 @@ export async function GET(
       );
     }
 
-    const { qrCode } = params;
+    const { qrCode } = context.params;
 
     if (!qrCode) {
       return NextResponse.json(
