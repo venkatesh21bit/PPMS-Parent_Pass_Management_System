@@ -15,6 +15,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if JWT_SECRET is configured
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not configured');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
