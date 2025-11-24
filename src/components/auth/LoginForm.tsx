@@ -70,7 +70,7 @@ export default function LoginForm() {
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-l-lg border ${
             isLogin
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
           }`}
         >
           <LogIn className="w-4 h-4 inline mr-2" />
@@ -82,7 +82,7 @@ export default function LoginForm() {
           className={`flex-1 py-2 px-4 text-sm font-medium rounded-r-lg border-t border-r border-b ${
             !isLogin
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
           }`}
         >
           <UserPlus className="w-4 h-4 inline mr-2" />
@@ -93,13 +93,13 @@ export default function LoginForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {!isLogin && (
           <div>
-            <label className="label-text">Full Name</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="input-field"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your full name"
               required
             />
@@ -107,27 +107,27 @@ export default function LoginForm() {
         )}
 
         <div>
-          <label className="label-text">Email</label>
+          <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="input-field"
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your email"
             required
           />
         </div>
 
         <div>
-          <label className="label-text">Password</label>
+          <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="input-field pr-10"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
               placeholder="Enter your password"
               required
             />
@@ -147,12 +147,12 @@ export default function LoginForm() {
 
         {!isLogin && (
           <div>
-            <label className="label-text">Role</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Role</label>
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="input-field"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
               <option value="PARENT">Parent</option>
@@ -165,7 +165,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {loading ? (
             <div className="flex items-center justify-center">
@@ -191,9 +191,9 @@ export default function LoginForm() {
       </form>
 
       {isLogin && (
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800 font-medium mb-2">Demo Credentials:</p>
-          <div className="text-xs text-blue-700 space-y-1">
+        <div className="mt-6 p-4 bg-gray-700 rounded-lg border border-gray-600">
+          <p className="text-sm text-gray-200 font-medium mb-2">Demo Credentials:</p>
+          <div className="text-xs text-gray-300 space-y-1">
             <div>Parent: parent@example.com / parent123</div>
             <div>Security: security@example.com / security123</div>
             <div>Warden: warden@example.com / warden123</div>

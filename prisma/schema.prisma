@@ -6,12 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   password  String
   role      UserRole
@@ -32,7 +32,7 @@ enum UserRole {
 }
 
 model Student {
-  id         String @id @default(uuid())
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
   name       String
   rollNumber String @unique
   course     String
@@ -46,9 +46,9 @@ model Student {
 }
 
 model VisitRequest {
-  id          String        @id @default(uuid())
-  parentId    String
-  studentId   String
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  parentId    String        @db.ObjectId
+  studentId   String        @db.ObjectId
   vehicleNo   String?
   purpose     String?
   status      RequestStatus @default(PENDING)
@@ -69,13 +69,14 @@ enum RequestStatus {
   PENDING
   APPROVED
   REJECTED
-  COMPLETED
+  INSIDE
+  OUT
 }
 
 model Approval {
-  id              String   @id @default(uuid())
-  visitRequestId  String
-  wardenId        String
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  visitRequestId  String   @db.ObjectId
+  wardenId        String   @db.ObjectId
   status          Boolean
   remarks         String?
   approvedAt      DateTime @default(now())
@@ -88,9 +89,9 @@ model Approval {
 }
 
 model ScanLog {
-  id             String   @id @default(uuid())
-  visitRequestId String
-  scannedBy      String
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  visitRequestId String   @db.ObjectId
+  scannedBy      String   @db.ObjectId
   scanType       ScanType
   location       String?
   timestamp      DateTime @default(now())

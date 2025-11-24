@@ -39,8 +39,12 @@ export default function ParentDashboard() {
   }, [addToast]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (user) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [user, fetchData]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -50,6 +54,10 @@ export default function ParentDashboard() {
         return <XCircle className="w-5 h-5 text-red-500" />;
       case VISIT_STATUS.PENDING:
         return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+      case VISIT_STATUS.INSIDE:
+        return <Clock className="w-5 h-5 text-blue-500" />;
+      case VISIT_STATUS.OUT:
+        return <CheckCircle className="w-5 h-5 text-gray-500" />;
       default:
         return <Clock className="w-5 h-5 text-gray-500" />;
     }
@@ -63,6 +71,10 @@ export default function ParentDashboard() {
         return 'bg-red-100 text-red-800';
       case VISIT_STATUS.PENDING:
         return 'bg-yellow-100 text-yellow-800';
+      case VISIT_STATUS.INSIDE:
+        return 'bg-blue-100 text-blue-800';
+      case VISIT_STATUS.OUT:
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }

@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
         parent: {
           select: { name: true, email: true }
         },
+        approvals: true,
         scanLogs: {
           orderBy: { timestamp: 'desc' }
         }
@@ -68,39 +69,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if visit is within valid time range
+    // Check if visit has expired (only check validUntil)
     const now = new Date();
-    if (now < visitRequest.validFrom || now > visitRequest.validUntil) {
+    if (visitRequest.validUntil && new Date(visitRequest.validUntil) < now) {
       return NextResponse.json(
-        { error: 'Visit request is outside valid time range' },
+        { error: 'Visit request has expired' },
         { status: 400 }
       );
     }
 
-    // Auto-detect scan type based on existing scan logs
-    const lastScan = visitRequest.scanLogs[0];
+    // Auto-detect scan type based on current status
     let scanType: 'ENTRY' | 'EXIT';
 
-    if (!lastScan) {
-      // First scan is always ENTRY
+    if (visitRequest.status === 'PENDING') {
+      // First scan - ENTRY
       scanType = 'ENTRY';
-    } else if (lastScan.scanType === 'ENTRY') {
-      // Last scan was entry, so this is EXIT
+    } else if (visitRequest.status === 'INSIDE') {
+      // Student is inside - EXIT scan (requires approval)
+      scanType = 'EXIT';
+      // Check if approved
+      const approvedApproval = visitRequest.approvals?.find((approval: { status: boolean }) => approval.status === true);
+      if (!approvedApproval) {
+        return NextResponse.json(
+          { error: 'Visit request must be approved by warden before exit' },
+          { status: 400 }
+        );
+      }
+    } else if (visitRequest.status === 'APPROVED') {
+      // Warden approved - ready for EXIT
       scanType = 'EXIT';
     } else {
-      // Last scan was exit, so this is ENTRY (re-entry)
-      scanType = 'ENTRY';
-    }
-
-    // Only require approval for EXIT scan
-    if (scanType === 'EXIT' && visitRequest.status !== 'APPROVED') {
+      // Status is REJECTED or OUT
       return NextResponse.json(
-        { error: 'Visit request is not approved for exit' },
+        { error: 'Invalid pass status. Cannot scan.' },
         { status: 400 }
       );
     }
 
-    // Create scan log
+    // Create scan log and update visit request status
     const scanLog = await prisma.scanLog.create({
       data: {
         visitRequestId: visitRequest.id,
@@ -115,11 +121,18 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Update visit request status based on scan type
+    const newStatus = scanType === 'ENTRY' ? 'INSIDE' : 'OUT';
+    const updatedVisitRequest = await prisma.visitRequest.update({
+      where: { id: visitRequest.id },
+      data: { status: newStatus }
+    });
+
     return NextResponse.json({
       message: `${scanType.toLowerCase()} recorded successfully`,
       scanLog,
       visitRequest: {
-        ...visitRequest,
+        ...updatedVisitRequest,
         scanType
       }
     });

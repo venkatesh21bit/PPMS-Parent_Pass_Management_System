@@ -12,7 +12,8 @@ export const VISIT_STATUS = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
-  COMPLETED: 'COMPLETED',
+  INSIDE: 'INSIDE',
+  OUT: 'OUT',
 } as const;
 
 export const SCAN_TYPES = {

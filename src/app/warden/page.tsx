@@ -178,7 +178,7 @@ export default function WardenDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<VisitRequest | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'pending-scans'>('pending-scans');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'pending-scans' | 'inside' | 'out'>('pending-scans');
 
   const fetchVisitRequests = useCallback(async () => {
     try {
@@ -200,8 +200,12 @@ export default function WardenDashboard() {
   }, [addToast]);
 
   useEffect(() => {
-    fetchVisitRequests();
-  }, [fetchVisitRequests]);
+    if (user) {
+      fetchVisitRequests();
+    } else {
+      setLoading(false);
+    }
+  }, [user, fetchVisitRequests]);
 
   const handleApprove = async (requestId: string, comments?: string) => {
     try {
@@ -281,6 +285,10 @@ export default function WardenDashboard() {
         return <XCircle className="w-5 h-5 text-red-500" />;
       case VISIT_STATUS.PENDING:
         return <Clock className="w-5 h-5 text-yellow-500" />;
+      case VISIT_STATUS.INSIDE:
+        return <AlertTriangle className="w-5 h-5 text-blue-500" />;
+      case VISIT_STATUS.OUT:
+        return <CheckCircle className="w-5 h-5 text-gray-500" />;
       default:
         return <AlertTriangle className="w-5 h-5 text-gray-500" />;
     }
@@ -294,21 +302,36 @@ export default function WardenDashboard() {
         return 'bg-red-100 text-red-800';
       case VISIT_STATUS.PENDING:
         return 'bg-yellow-100 text-yellow-800';
+      case VISIT_STATUS.INSIDE:
+        return 'bg-blue-100 text-blue-800';
+      case VISIT_STATUS.OUT:
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const filteredRequests = filter === 'pending-scans' 
-    ? pendingScannedVisits 
-    : visitRequests.filter(request => {
-        if (filter === 'all') return true;
-        return request.status === filter.toUpperCase();
-      });
+  const filteredRequests = (() => {
+    if (filter === 'pending-scans') {
+      // Show visits with INSIDE status (scanned for entry, need approval)
+      return visitRequests.filter(r => r.status === VISIT_STATUS.INSIDE);
+    } else if (filter === 'all') {
+      return visitRequests;
+    } else if (filter === 'inside') {
+      return visitRequests.filter(r => r.status === VISIT_STATUS.INSIDE);
+    } else if (filter === 'out') {
+      return visitRequests.filter(r => r.status === VISIT_STATUS.OUT);
+    } else {
+      // Filter by status (pending, approved, rejected)
+      return visitRequests.filter(request => request.status === filter.toUpperCase());
+    }
+  })();
 
   const pendingCount = visitRequests.filter(r => r.status === VISIT_STATUS.PENDING).length;
   const approvedCount = visitRequests.filter(r => r.status === VISIT_STATUS.APPROVED).length;
   const rejectedCount = visitRequests.filter(r => r.status === VISIT_STATUS.REJECTED).length;
+  const insideCount = visitRequests.filter(r => r.status === VISIT_STATUS.INSIDE).length;
+  const outCount = visitRequests.filter(r => r.status === VISIT_STATUS.OUT).length;
 
   if (loading) {
     return (
@@ -395,15 +418,16 @@ export default function WardenDashboard() {
             <div className="border-b border-gray-200 dark:border-gray-700">
               <nav className="-mb-px flex space-x-8 px-6">
                 {[
-                  { key: 'pending-scans', label: 'Scanned (Need Approval)', count: pendingScannedVisits.length },
+                  { key: 'pending-scans', label: 'Scanned (Need Approval)', count: insideCount },
                   { key: 'pending', label: 'Pending', count: pendingCount },
                   { key: 'all', label: 'All', count: visitRequests.length },
                   { key: 'approved', label: 'Approved', count: approvedCount },
                   { key: 'rejected', label: 'Rejected', count: rejectedCount },
+                  { key: 'out', label: 'Completed (Out)', count: outCount },
                 ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setFilter(tab.key as 'all' | 'pending' | 'approved' | 'rejected' | 'pending-scans')}
+                  onClick={() => setFilter(tab.key as 'all' | 'pending' | 'approved' | 'rejected' | 'pending-scans' | 'inside' | 'out')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                     filter === tab.key
                       ? 'border-blue-500 text-blue-600 dark:text-blue-400'
@@ -526,7 +550,7 @@ export default function WardenDashboard() {
                           <Eye className="w-4 h-4" />
                           <span>Review</span>
                         </button>
-                        {request.status === VISIT_STATUS.PENDING && (
+                        {request.status === VISIT_STATUS.INSIDE && (
                           <>
                             <button
                               onClick={() => handleApprove(request.id)}

@@ -40,9 +40,10 @@ export async function GET(request: NextRequest) {
     // Filter based on user role
     if (user.role === 'PARENT') {
       whereClause.parentId = user.id;
-    } else if (user.role === 'WARDEN' && hostelName) {
-      whereClause.student = {
-        hostelName: hostelName
+    } else if (user.role === 'WARDEN') {
+      // Wardens should only see visits that have been scanned by security (INSIDE status)
+      whereClause.status = {
+        in: ['INSIDE', 'APPROVED', 'OUT']
       };
     }
 

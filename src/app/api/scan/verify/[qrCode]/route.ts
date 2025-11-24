@@ -20,7 +20,7 @@ async function authenticate(request: NextRequest) {
 
 export async function GET(
   request: NextRequest,
-  context: unknown
+  context: { params: Promise<{ qrCode: string }> }
 ) {
   try {
     // Authenticate user
@@ -32,17 +32,7 @@ export async function GET(
       );
     }
 
-    let qrCode: string | undefined;
-    if (
-      context &&
-      typeof context === 'object' &&
-      'params' in context &&
-      (context as { params?: unknown }).params &&
-      typeof (context as { params: unknown }).params === 'object' &&
-      'qrCode' in (context as { params: { qrCode?: unknown } }).params
-    ) {
-      qrCode = ((context as { params: { qrCode?: unknown } }).params.qrCode) as string;
-    }
+    const { qrCode } = await context.params;
 
     if (!qrCode) {
       return NextResponse.json(
@@ -71,65 +61,67 @@ export async function GET(
       });
     }
 
-    // Check if visit is expired
-    const now = new Date();
-    if (visitRequest.validUntil && visitRequest.validUntil < now) {
+    // Check if pass is already OUT (completed)
+    if (visitRequest.status === 'OUT') {
       return NextResponse.json({
         valid: false,
-        message: 'Visit request has expired'
+        message: 'Invalid QR code - this pass has already been used and student has exited'
       });
     }
 
-    // Determine next action based on scan history
-    const lastScan = visitRequest.scanLogs[0]; // Most recent scan
+    // Check if visit is expired (only check validUntil, not validFrom)
+    const now = new Date();
+    if (visitRequest.validUntil && new Date(visitRequest.validUntil) < now) {
+      console.log('Pass expired check:', {
+        validUntil: visitRequest.validUntil,
+        validUntilDate: new Date(visitRequest.validUntil),
+        now: now,
+        expired: new Date(visitRequest.validUntil) < now
+      });
+      return NextResponse.json({
+        valid: false,
+        message: `Visit request has expired. Valid until: ${new Date(visitRequest.validUntil).toLocaleString()}, Current time: ${now.toLocaleString()}`
+      });
+    }
+
+    // Determine next action based on current status
     let nextAction: 'ENTRY' | 'EXIT';
     let currentStatus: string;
 
-    if (!lastScan) {
-      // No previous scans - this is first scan (ENTRY)
+    if (visitRequest.status === 'PENDING') {
+      // First scan - ENTRY
       nextAction = 'ENTRY';
-      currentStatus = 'No previous scans - ready for entry';
-      // Allow entry even if not approved
-      return NextResponse.json({
-        valid: true,
-        nextAction,
-        currentStatus,
-        visitRequest: {
-          id: visitRequest.id,
-          purpose: visitRequest.purpose,
-          student: {
-            name: visitRequest.student.name,
-            rollNumber: visitRequest.student.rollNumber,
-            course: visitRequest.student.course,
-            year: visitRequest.student.year
-          },
-          parent: {
-            name: visitRequest.parent.name,
-            email: visitRequest.parent.email
-          },
-          validFrom: visitRequest.validFrom,
-          validUntil: visitRequest.validUntil,
-          lastScan: null
-        }
-      });
-    } else if (lastScan.scanType === 'ENTRY') {
-      // Last scan was entry - next should be exit
+      currentStatus = 'Pass pending - ready for entry scan';
+    } else if (visitRequest.status === 'INSIDE') {
+      // Student is inside - next should be exit
       nextAction = 'EXIT';
-      currentStatus = 'Currently inside - ready for exit';
+      currentStatus = 'Student inside - needs warden approval before exit';
       // Require approval for exit
       const approvedApproval = visitRequest.approvals.find((approval: { status: boolean }) => approval.status === true);
       if (!approvedApproval) {
         return NextResponse.json({
           valid: false,
-          message: 'Visit request is not approved for exit yet'
+          message: 'Visit request is not approved by warden yet. Student cannot exit.'
         });
       }
+    } else if (visitRequest.status === 'APPROVED') {
+      // Warden approved - ready for exit
+      nextAction = 'EXIT';
+      currentStatus = 'Approved - ready for exit scan';
+    } else if (visitRequest.status === 'REJECTED') {
+      return NextResponse.json({
+        valid: false,
+        message: 'Visit request was rejected by warden'
+      });
     } else {
-      // Last scan was exit - next should be entry
-      nextAction = 'ENTRY';
-      currentStatus = 'Currently outside - ready for entry';
-      // Allow re-entry (if needed)
+      // Status is OUT or unknown
+      return NextResponse.json({
+        valid: false,
+        message: 'Invalid pass status'
+      });
     }
+
+    const lastScan = visitRequest.scanLogs[0]; // Most recent scan
 
     return NextResponse.json({
       valid: true,
@@ -142,7 +134,8 @@ export async function GET(
           name: visitRequest.student.name,
           rollNumber: visitRequest.student.rollNumber,
           course: visitRequest.student.course,
-          year: visitRequest.student.year
+          year: visitRequest.student.year,
+          roomNumber: visitRequest.student.roomNumber
         },
         parent: {
           name: visitRequest.parent.name,

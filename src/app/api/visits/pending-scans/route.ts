@@ -37,15 +37,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get visit requests that have been scanned but are still pending approval
+    // Get visit requests that have been scanned for entry (INSIDE status) and need approval
     const pendingScannedVisits = await prisma.visitRequest.findMany({
       where: {
-        status: 'PENDING',
-        scanLogs: {
-          some: {
-            scanType: 'ENTRY'
-          }
-        }
+        status: 'INSIDE'
       },
       include: {
         student: true,

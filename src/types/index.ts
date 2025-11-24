@@ -25,7 +25,7 @@ export interface VisitRequest {
   studentId: string;
   vehicleNo?: string;
   purpose?: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'INSIDE' | 'OUT';
   qrCode: string;
   validFrom: string;
   validUntil: string;

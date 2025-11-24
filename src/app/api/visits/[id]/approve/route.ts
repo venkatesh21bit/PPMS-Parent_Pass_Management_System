@@ -21,7 +21,7 @@ async function authenticate(request: NextRequest) {
 
 export async function POST(
   request: NextRequest,
-  context: unknown
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
 
@@ -42,17 +42,7 @@ export async function POST(
       );
     }
 
-    let id: string | undefined;
-    if (
-      context &&
-      typeof context === 'object' &&
-      'params' in context &&
-      (context as { params?: unknown }).params &&
-      typeof (context as { params: unknown }).params === 'object' &&
-      'id' in (context as { params: { id?: unknown } }).params
-    ) {
-      id = ((context as { params: { id?: unknown } }).params.id) as string;
-    }
+    const { id } = await context.params;
     if (!id) {
       return NextResponse.json(
         { error: 'Visit request id is required' },
