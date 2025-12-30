@@ -143,8 +143,7 @@ export default function SecurityDashboard() {
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const getScanTypeIcon = (_scanType: string): ReactElement => {
+  const getScanTypeIcon = (): ReactElement => {
     return <QrCode className="w-5 h-5 text-blue-500" />;
   };
 

@@ -14,7 +14,7 @@ async function updateWardens() {
     // Get all existing wardens
     const wardens = await prisma.user.findMany({
       where: {
-        role: 'WARDEN'
+        role: 'HOSTEL_WARDEN'
       }
     });
 
