@@ -264,7 +264,7 @@ export default function SecurityDashboard() {
                     {recentScans.map((scan) => (
                       <div key={scan.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div className="flex items-center space-x-3">
-                          {getScanTypeIcon(scan.scanType)}
+                          {getScanTypeIcon()}
                           <div>
                             <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {scan.visitRequest?.student?.name || 'Unknown Student'}
@@ -333,7 +333,7 @@ export default function SecurityDashboard() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
-                        {getScanTypeIcon(log.scanType)}
+                        {getScanTypeIcon()}
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getScanTypeColor(log.scanType)}`}>
                           {log.scanType}
                         </span>
