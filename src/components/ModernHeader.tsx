@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import ThemeToggle from '@/components/ThemeToggle';
 import { User, LogOut, Bell } from 'lucide-react';
 import { useState } from 'react';
 
@@ -54,18 +53,13 @@ export default function ModernHeader({ title, subtitle, actions }: ModernHeaderP
             {actions}
           </div>
 
-          {/* Right side - User menu, notifications, theme toggle */}
+          {/* Right side - User menu, notifications */}
           <div className="flex items-center space-x-1 sm:space-x-3">
             {/* Notifications - hidden on small mobile */}
             <button className="hidden xs:block relative p-1.5 sm:p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
               <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full"></span>
             </button>
-
-            {/* Theme Toggle */}
-            <div className="scale-90 sm:scale-100">
-              <ThemeToggle />
-            </div>
 
             {/* User Menu */}
             <div className="relative">
