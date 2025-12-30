@@ -20,8 +20,21 @@ export default function Home() {
         case 'SECURITY':
           router.push('/security');
           break;
+        case 'HOSTEL_WARDEN':
+          // Redirect to appropriate hostel portal based on hostelName
+          if (user.hostelName === 'Agasthya Bhavanam') {
+            router.push('/hostel/agasthya');
+          } else if (user.hostelName === 'Vasishta Bhavanam') {
+            router.push('/hostel/vasishta');
+          } else if (user.hostelName === 'Gautama Bhavanam') {
+            router.push('/hostel/gautama');
+          } else {
+            router.push('/hostel/agasthya'); // Default fallback
+          }
+          break;
         case 'WARDEN':
-          router.push('/warden');
+          // Legacy support - redirect to Agasthya by default
+          router.push('/hostel/agasthya');
           break;
         default:
           break;

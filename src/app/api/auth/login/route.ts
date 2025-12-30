@@ -64,7 +64,6 @@ export async function POST(request: NextRequest) {
     );
 
     // Remove password from response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _pw, ...userWithoutPassword } = user;
 
     return NextResponse.json({
@@ -75,8 +74,14 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Login error:', error);
+    console.error('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+    console.error('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+      },
       { status: 500 }
     );
   }

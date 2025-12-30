@@ -35,16 +35,19 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const hostelName = searchParams.get('hostelName');
 
-  const whereClause: Record<string, unknown> = {};
+    const whereClause: Record<string, unknown> = {};
 
     // Filter based on user role
     if (user.role === 'PARENT') {
       whereClause.parentId = user.id;
-    } else if (user.role === 'WARDEN') {
-      // Wardens should only see visits that have been scanned by security (INSIDE status)
-      whereClause.status = {
-        in: ['INSIDE', 'APPROVED', 'OUT']
-      };
+    } else if (user.role === 'HOSTEL_WARDEN' || user.role === 'WARDEN') {
+      // Hostel wardens should only see visits for their hostel
+      // Filter by hostelName if provided (from query parameter)
+      if (hostelName) {
+        whereClause.student = {
+          hostelName: hostelName
+        };
+      }
     }
 
     // Add status filter if provided

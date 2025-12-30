@@ -11,13 +11,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  password  String
-  role      UserRole
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  email      String   @unique
+  password   String
+  role       UserRole
+  name       String
+  hostelName String?  // For hostel wardens - Agasthya, Vasishta, or Gautama
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   visitRequests VisitRequest[]
@@ -28,7 +29,7 @@ model User {
 enum UserRole {
   PARENT
   SECURITY
-  WARDEN
+  HOSTEL_WARDEN
 }
 
 model Student {
