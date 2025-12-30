@@ -4,7 +4,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'PARENT' | 'SECURITY' | 'WARDEN';
+  role: 'PARENT' | 'SECURITY' | 'HOSTEL_WARDEN' | 'WARDEN';
+  hostelName?: string;
   createdAt: string;
 }
 
@@ -89,7 +90,8 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
-  role: 'PARENT' | 'SECURITY' | 'WARDEN';
+  role: 'PARENT' | 'SECURITY' | 'HOSTEL_WARDEN' | 'WARDEN';
+  hostelName?: string;
 }
 
 export interface Toast {

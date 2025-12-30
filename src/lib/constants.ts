@@ -5,7 +5,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 export const USER_ROLES = {
   PARENT: 'PARENT',
   SECURITY: 'SECURITY',
-  WARDEN: 'WARDEN',
+  HOSTEL_WARDEN: 'HOSTEL_WARDEN',
 } as const;
 
 export const VISIT_STATUS = {
@@ -32,7 +32,9 @@ export const ROUTES = {
   HOME: '/',
   PARENT: '/parent',
   SECURITY: '/security',
-  WARDEN: '/warden',
+  AGASTHYA: '/hostel/agasthya',
+  VASISHTA: '/hostel/vasishta',
+  GAUTAMA: '/hostel/gautama',
   LOGIN: '/login',
   REGISTER: '/register',
 } as const;
@@ -43,12 +45,9 @@ export const LOCAL_STORAGE_KEYS = {
 } as const;
 
 export const HOSTELS = [
-  'Sunrise Hostel',
-  'Moonlight Hostel',
-  'Galaxy Hostel',
-  'Ocean View Hostel',
-  'Mountain Hostel',
-  'River Side Hostel',
+  'Agasthya Bhavanam',
+  'Vasishta Bhavanam',
+  'Gautama Bhavanam',
 ] as const;
 
 export const COURSES = [

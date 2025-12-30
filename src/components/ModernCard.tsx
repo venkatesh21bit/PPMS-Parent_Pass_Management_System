@@ -47,25 +47,27 @@ export function StatsCard({ title, value, icon, color = 'blue', trend }: StatsCa
 
   return (
     <ModernCard hover>
-      <div className="p-6">
+      <div className="p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+          <div className="flex-1 min-w-0 mr-3">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 truncate">
               {title}
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
               {value}
             </p>
             {trend && (
-              <p className={`text-sm font-medium mt-2 ${
+              <p className={`text-xs sm:text-sm font-medium mt-1 sm:mt-2 ${
                 trend.isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
               }`}>
                 {trend.isPositive ? '↗' : '↘'} {Math.abs(trend.value)}%
               </p>
             )}
           </div>
-          <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-            {icon}
+          <div className={`p-2 sm:p-2.5 md:p-3 rounded-lg flex-shrink-0 ${colorClasses[color]}`}>
+            <div className="w-5 h-5 sm:w-6 sm:h-6">
+              {icon}
+            </div>
           </div>
         </div>
       </div>

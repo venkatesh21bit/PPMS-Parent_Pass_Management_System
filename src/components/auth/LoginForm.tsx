@@ -192,11 +192,34 @@ export default function LoginForm() {
 
       {isLogin && (
         <div className="mt-6 p-4 bg-gray-700 rounded-lg border border-gray-600">
-          <p className="text-sm text-gray-200 font-medium mb-2">Demo Credentials:</p>
-          <div className="text-xs text-gray-300 space-y-1">
-            <div>Parent: parent@example.com / parent123</div>
-            <div>Security: security@example.com / security123</div>
-            <div>Warden: warden@example.com / warden123</div>
+          <p className="text-sm text-gray-200 font-medium mb-3">🔑 Demo Credentials:</p>
+          <div className="text-xs text-gray-300 space-y-2">
+            <div className="pb-2 border-b border-gray-600">
+              <div className="font-semibold text-blue-400 mb-1">Parent:</div>
+              <div className="pl-2">📧 parent@example.com</div>
+              <div className="pl-2">🔒 parent123</div>
+            </div>
+            
+            <div className="pb-2 border-b border-gray-600">
+              <div className="font-semibold text-green-400 mb-1">Security:</div>
+              <div className="pl-2">📧 security@example.com</div>
+              <div className="pl-2">🔒 security123</div>
+            </div>
+            
+            <div>
+              <div className="font-semibold text-purple-400 mb-1">Hostel Wardens:</div>
+              <div className="pl-2 space-y-1">
+                <div>
+                  <span className="text-purple-300">Agasthya:</span> agasthya.warden@college.edu / warden123
+                </div>
+                <div>
+                  <span className="text-purple-300">Vasishta:</span> vasishta.warden@college.edu / warden123
+                </div>
+                <div>
+                  <span className="text-purple-300">Gautama:</span> gautama.warden@college.edu / warden123
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -40,10 +40,32 @@ export default function NewVisitForm({ isOpen, onClose, onSuccess }: NewVisitFor
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validation
     if (!formData.studentName || !formData.rollNumber || !formData.hostelName || !formData.visitDate || !formData.visitTime) {
       addToast({
         title: 'Validation Error',
         message: 'Please fill in all required fields',
+        type: 'error'
+      });
+      return;
+    }
+
+    // Vehicle Number validation - must be provided
+    if (!formData.vehicleNo || formData.vehicleNo.trim() === '') {
+      addToast({
+        title: 'Validation Error',
+        message: 'Vehicle Number is mandatory',
+        type: 'error'
+      });
+      return;
+    }
+
+    // Roll Number validation - CB.SC.U4CSE23519 format
+    const rollNumberRegex = /^CB\.SC\.U4[A-Z]{3}\d{5}$/i;
+    if (!rollNumberRegex.test(formData.rollNumber)) {
+      addToast({
+        title: 'Validation Error',
+        message: 'Roll Number must be in format: CB.SC.U4XXX##### (e.g., CB.SC.U4CSE23519)',
         type: 'error'
       });
       return;
@@ -63,7 +85,7 @@ export default function NewVisitForm({ isOpen, onClose, onSuccess }: NewVisitFor
         degree: formData.degree,
         branch: formData.branch,
         year: formData.year ? parseInt(formData.year) : undefined,
-        vehicleNo: formData.vehicleNo || undefined,
+        vehicleNo: formData.vehicleNo, // Now mandatory
         purpose: formData.purpose || undefined,
         validFrom: visitDateTime.toISOString(),
         validUntil: validUntil.toISOString()
@@ -113,22 +135,22 @@ export default function NewVisitForm({ isOpen, onClose, onSuccess }: NewVisitFor
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">New Visit Request</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">New Visit Request</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Student Information */}
-          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Student Information</h3>
+          <div className="bg-gray-50 dark:bg-gray-800 p-3 sm:p-4 rounded-lg space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-3 sm:mb-4">Student Information</h3>
             
             {/* Student Name */}
             <div>
@@ -155,28 +177,32 @@ export default function NewVisitForm({ isOpen, onClose, onSuccess }: NewVisitFor
               <input
                 type="text"
                 value={formData.rollNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
-                placeholder="e.g., cb.sc.u4cse23519"
+                onChange={(e) => setFormData(prev => ({ ...prev, rollNumber: e.target.value.toUpperCase() }))}
+                placeholder="e.g., CB.SC.U4CSE23519"
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Format: CB.SC.U4XXX##### (3 letters + 5 digits)</p>
             </div>
 
             {/* Hostel and Room */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <Building className="w-4 h-4 inline mr-1" />
                   Hostel Name *
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.hostelName}
                   onChange={(e) => setFormData(prev => ({ ...prev, hostelName: e.target.value }))}
-                  placeholder="e.g., Boys Hostel A"
                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
-                />
+                >
+                  <option value="">Select Hostel</option>
+                  <option value="Agasthya Bhavanam">Agasthya Bhavanam</option>
+                  <option value="Vasishta Bhavanam">Vasishta Bhavanam</option>
+                  <option value="Gautama Bhavanam">Gautama Bhavanam</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -302,14 +328,15 @@ export default function NewVisitForm({ isOpen, onClose, onSuccess }: NewVisitFor
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Car className="w-4 h-4 inline mr-1" />
-              Vehicle Number (Optional)
+              Vehicle Number *
             </label>
             <input
               type="text"
               value={formData.vehicleNo}
-              onChange={(e) => setFormData(prev => ({ ...prev, vehicleNo: e.target.value }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, vehicleNo: e.target.value.toUpperCase() }))}
               placeholder="e.g., KA-01-AB-1234"
               className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              required
             />
           </div>
 

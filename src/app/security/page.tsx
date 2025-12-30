@@ -202,13 +202,13 @@ export default function SecurityDashboard() {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           {/* QR Scanner Section */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">QR Code Scanner</h2>
-              <div className={`px-3 py-1 rounded-full text-sm ${
+          <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">QR Code Scanner</h2>
+              <div className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
                 scanning 
                   ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
@@ -221,29 +221,29 @@ export default function SecurityDashboard() {
           </div>
 
           {/* Stats and Recent Scans */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <QrCode className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <QrCode className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Scans</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{Array.isArray(scanLogs) ? scanLogs.length : 0}</p>
+                  <div className="ml-2 sm:ml-3">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">Total Scans</p>
+                    <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{Array.isArray(scanLogs) ? scanLogs.length : 0}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
                   </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Today&apos;s Entries</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  <div className="ml-2 sm:ml-3">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">Today&apos;s Entries</p>
+                    <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                       {(Array.isArray(scanLogs) ? scanLogs : []).filter(log => 
                         log.scanType === SCAN_TYPES.ENTRY && 
                         new Date(log.createdAt).toDateString() === new Date().toDateString()
@@ -256,10 +256,10 @@ export default function SecurityDashboard() {
 
             {/* Recent Scans */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Scans</h3>
+              <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Recent Scans</h3>
               </div>
-              <div className="p-6">
+              <div className="p-3 sm:p-4 md:p-6">
                 {Array.isArray(recentScans) && recentScans.length > 0 ? (
                   <div className="space-y-4">
                     {recentScans.map((scan) => (
@@ -293,11 +293,13 @@ export default function SecurityDashboard() {
         </div>
 
         {/* Full Scan History */}
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Scan History</h2>
+        <div className="mt-6 sm:mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Scan History</h2>
           </div>
-          <div className="overflow-x-auto">
+          
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
@@ -306,9 +308,6 @@ export default function SecurityDashboard() {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Scan Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Location
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Time
@@ -341,11 +340,8 @@ export default function SecurityDashboard() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.location || 'Main Gate'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(log.createdAt).toLocaleString()}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white dark:text-white">
+                      {new Date(log.timestamp || log.createdAt).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -356,6 +352,37 @@ export default function SecurityDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+          
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+            {(Array.isArray(scanLogs) ? scanLogs : []).map((log) => (
+              <div key={log.id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {log.visitRequest?.student?.name || 'Unknown'}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Room: {log.visitRequest?.student?.roomNumber || 'N/A'}
+                      </div>
+                    </div>
+                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getScanTypeColor(log.scanType)}`}>
+                      {log.scanType}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-300">
+                    {new Date(log.timestamp || log.createdAt).toLocaleString()}
+                  </div>
+                  <div className="pt-1">
+                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                      Recorded
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

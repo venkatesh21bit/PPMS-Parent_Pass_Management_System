@@ -118,9 +118,9 @@ export default function ParentDashboard() {
         subtitle={`Welcome back, ${user?.name}`}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
           <StatsCard
             title="Total Requests"
             value={visitRequests.length}
@@ -143,17 +143,19 @@ export default function ParentDashboard() {
 
         {/* Recent Visit Requests */}
         <ModernCard>
-          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Visit Requests</h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Recent Visit Requests</h2>
             <button
               onClick={() => setShowNewVisitForm(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 shadow-md hover:shadow-lg transition-all duration-200"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all duration-200 text-sm"
             >
               <Plus className="w-4 h-4" />
               <span>New Visit Request</span>
             </button>
           </div>
-          <div className="overflow-x-auto">
+          
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
@@ -266,6 +268,90 @@ export default function ParentDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+          
+          {/* Mobile Card View */}
+          <div className="lg:hidden divide-y divide-gray-200 dark:divide-gray-700">
+            {visitRequests.map((request) => (
+              <div key={request.id} className="p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <div className="space-y-3">
+                  {/* Student Info */}
+                  <div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      {request.student?.name}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Roll No: {request.student?.rollNumber}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {request.student?.hostelName} {request.student?.roomNumber && `- Room ${request.student.roomNumber}`}
+                    </div>
+                  </div>
+                  
+                  {/* Date & Status */}
+                  <div className="flex justify-between items-center">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      {new Date(request.validFrom).toLocaleDateString()} {new Date(request.validFrom).toLocaleTimeString()}
+                    </div>
+                    <div className="flex items-center space-x-1.5">
+                      {getStatusIcon(request.status)}
+                      <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(request.status)}`}>
+                        {request.status}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Purpose */}
+                  <div className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Purpose: </span>
+                    {request.purpose}
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    <div className="flex items-center space-x-3">
+                      <button 
+                        onClick={() => {
+                          setSelectedQRRequest(request);
+                          setShowModal(true);
+                        }}
+                        className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center space-x-1 text-xs"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>View</span>
+                      </button>
+                      {(request.status === 'PENDING' && (!request.scanLogs || request.scanLogs.length === 0)) && (
+                        <button 
+                          onClick={() => handleDeleteRequest(request.id)}
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 flex items-center space-x-1 text-xs"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          <span>Delete</span>
+                        </button>
+                      )}
+                    </div>
+                    {request.qrCode && (
+                      <button 
+                        className={`${
+                          request.status === 'APPROVED' 
+                            ? 'text-green-600 hover:text-green-700 dark:text-green-400'
+                            : request.status === 'REJECTED'
+                            ? 'text-red-600 hover:text-red-700 dark:text-red-400'
+                            : 'text-blue-600 hover:text-blue-700 dark:text-blue-400'
+                        } flex items-center space-x-1 text-xs`}
+                        onClick={() => {
+                          setSelectedQRRequest(request);
+                          setShowQRCode(true);
+                        }}
+                      >
+                        <QrCode className="w-5 h-5" />
+                        <span>QR Code</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </ModernCard>
       </div>
