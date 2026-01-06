@@ -167,7 +167,7 @@ export default function VasishtaHostelPortal() {
         (r: VisitRequest) => r.status === VISIT_STATUS.INSIDE
       );
       
-      if (pendingScannedVisits.length > 0 && filter === 'pending-scans') {
+      if (pendingScannedVisits.length > 0) {
         addToast({
           title: 'Attention Required',
           message: `${pendingScannedVisits.length} visit(s) scanned and awaiting approval`,
@@ -183,7 +183,7 @@ export default function VasishtaHostelPortal() {
     } finally {
       setLoading(false);
     }
-  }, [addToast, filter]);
+  }, [addToast]);
 
   useEffect(() => {
     if (user) {
@@ -191,7 +191,7 @@ export default function VasishtaHostelPortal() {
     } else {
       setLoading(false);
     }
-  }, [user, fetchVisitRequests]);
+  }, [user]);
 
   const handleApprove = async (requestId: string, comments?: string) => {
     try {
