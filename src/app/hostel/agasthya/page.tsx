@@ -169,7 +169,7 @@ export default function AgasthyaHostelPortal() {
         (r: VisitRequest) => r.status === VISIT_STATUS.INSIDE
       );
       
-      if (pendingScannedVisits.length > 0 && filter === 'pending-scans') {
+      if (pendingScannedVisits.length > 0) {
         addToast({
           title: 'Attention Required',
           message: `${pendingScannedVisits.length} visit(s) scanned and awaiting approval`,
@@ -185,7 +185,7 @@ export default function AgasthyaHostelPortal() {
     } finally {
       setLoading(false);
     }
-  }, [addToast, filter]);
+  }, [addToast]);
 
   useEffect(() => {
     if (user) {
@@ -193,7 +193,7 @@ export default function AgasthyaHostelPortal() {
     } else {
       setLoading(false);
     }
-  }, [user, fetchVisitRequests]);
+  }, [user]);
 
   const handleApprove = async (requestId: string, comments?: string) => {
     try {
