@@ -29,19 +29,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user is WARDEN
-    if (user.role !== 'WARDEN') {
+    // Check if user is WARDEN or HOSTEL_WARDEN
+    if (user.role !== 'WARDEN' && user.role !== 'HOSTEL_WARDEN') {
       return NextResponse.json(
         { error: 'Access denied. Only wardens can access pending scanned visits.' },
         { status: 403 }
       );
     }
 
+    // Build where clause based on warden type
+    const whereClause: {
+      status: string;
+      student?: { hostelName: string };
+    } = {
+      status: 'INSIDE'
+    };
+
+    // If hostel warden, filter by their hostel
+    if (user.role === 'HOSTEL_WARDEN' && user.hostelName) {
+      whereClause.student = { hostelName: user.hostelName };
+    }
+
     // Get visit requests that have been scanned for entry (INSIDE status) and need approval
     const pendingScannedVisits = await prisma.visitRequest.findMany({
-      where: {
-        status: 'INSIDE'
-      },
+      where: whereClause,
       include: {
         student: true,
         parent: {
