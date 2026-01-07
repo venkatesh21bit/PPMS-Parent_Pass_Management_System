@@ -35,7 +35,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const hostelName = searchParams.get('hostelName');
 
-    const whereClause: Record<string, unknown> = {};
+    const whereClause: {
+      parentId?: string;
+      student?: { hostelName: string };
+      status?: string;
+    } = {};
 
     // Filter based on user role
     if (user.role === 'PARENT') {
@@ -89,6 +93,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ visitRequests });
   } catch (error) {
     console.error('Get visit requests error:', error);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Stack trace:', error instanceof Error ? error.stack : '');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
