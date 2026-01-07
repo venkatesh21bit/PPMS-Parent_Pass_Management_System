@@ -40,12 +40,16 @@ export async function GET(request: NextRequest) {
     // Filter based on user role
     if (user.role === 'PARENT') {
       whereClause.parentId = user.id;
-    } else if (user.role === 'HOSTEL_WARDEN' || user.role === 'WARDEN') {
+    } else if (user.role === 'HOSTEL_WARDEN') {
       // Hostel wardens should only see visits for their hostel
-      // Filter by hostelName if provided (from query parameter)
+      // Filter by hostelName if provided (from query parameter) or user's hostelName
       if (hostelName) {
         whereClause.student = {
           hostelName: hostelName
+        };
+      } else if (user.hostelName) {
+        whereClause.student = {
+          hostelName: user.hostelName
         };
       }
     }
