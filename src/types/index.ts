@@ -4,7 +4,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'PARENT' | 'SECURITY' | 'HOSTEL_WARDEN' | 'WARDEN';
+  role: 'PARENT' | 'SECURITY' | 'HOSTEL_WARDEN';
   hostelName?: string;
   createdAt: string;
 }
@@ -90,7 +90,7 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
-  role: 'PARENT' | 'SECURITY' | 'HOSTEL_WARDEN' | 'WARDEN';
+  role: 'PARENT' | 'SECURITY' | 'HOSTEL_WARDEN';
   hostelName?: string;
 }
 

@@ -4,11 +4,19 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name, role } = await request.json();
+    const { email, password, name, role, hostelName } = await request.json();
 
     if (!email || !password || !name || !role) {
       return NextResponse.json(
         { error: 'Email, password, name, and role are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate hostelName for HOSTEL_WARDEN role
+    if (role === 'HOSTEL_WARDEN' && !hostelName) {
+      return NextResponse.json(
+        { error: 'Hostel name is required for hostel wardens' },
         { status: 400 }
       );
     }
@@ -34,13 +42,15 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         name,
-        role
+        role,
+        hostelName: role === 'HOSTEL_WARDEN' ? hostelName : null
       },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
+        hostelName: true,
         createdAt: true
       }
     });

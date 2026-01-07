@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const whereClause: {
       parentId?: string;
       student?: { hostelName: string };
-      status?: string;
+      status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'INSIDE' | 'OUT';
     } = {};
 
     // Filter based on user role
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     // Add status filter if provided
     if (status) {
-      whereClause.status = status;
+      whereClause.status = status as 'PENDING' | 'APPROVED' | 'REJECTED' | 'INSIDE' | 'OUT';
     }
 
 

@@ -13,7 +13,8 @@ export default function LoginForm() {
     email: '',
     password: '',
     name: '',
-    role: 'PARENT' as 'PARENT' | 'SECURITY' | 'WARDEN',
+    role: 'PARENT' as 'PARENT' | 'SECURITY' | 'HOSTEL_WARDEN',
+    hostelName: '',
   });
 
   const { login, register } = useAuth();
@@ -146,20 +147,39 @@ export default function LoginForm() {
         </div>
 
         {!isLogin && (
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Role</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            >
-              <option value="PARENT">Parent</option>
-              <option value="SECURITY">Security</option>
-              <option value="WARDEN">Warden</option>
-            </select>
-          </div>
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Role</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="PARENT">Parent</option>
+                <option value="SECURITY">Security</option>
+                <option value="HOSTEL_WARDEN">Hostel Warden</option>
+              </select>
+            </div>
+            {formData.role === 'HOSTEL_WARDEN' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Hostel Name</label>
+                <select
+                  name="hostelName"
+                  value={formData.hostelName}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Hostel</option>
+                  <option value="Agasthya Bhavanam">Agasthya Bhavanam</option>
+                  <option value="Vasishta Bhavanam">Vasishta Bhavanam</option>
+                  <option value="Gautama Bhavanam">Gautama Bhavanam</option>
+                </select>
+              </div>
+            )}
+          </>
         )}
 
         <button
