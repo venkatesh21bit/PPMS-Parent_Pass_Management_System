@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
         email: true,
         name: true,
         role: true,
+        hostelName: true,
         password: true,
       },
     });
@@ -57,7 +58,8 @@ export async function POST(request: NextRequest) {
       { 
         id: user.id, 
         email: user.email, 
-        role: user.role 
+        role: user.role,
+        hostelName: user.hostelName
       },
       process.env.JWT_SECRET!,
       { expiresIn: '24h' }

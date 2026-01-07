@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause based on warden type
     const whereClause: {
-      status: string;
+      status: 'INSIDE';
       student?: { hostelName: string };
     } = {
       status: 'INSIDE'

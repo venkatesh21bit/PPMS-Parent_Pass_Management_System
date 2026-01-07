@@ -34,8 +34,11 @@ export async function POST(
       );
     }
 
+    console.log('User attempting to approve:', { id: user.id, role: user.role, hostelName: user.hostelName });
+
     // Check if user is WARDEN or HOSTEL_WARDEN
     if (user.role !== 'WARDEN' && user.role !== 'HOSTEL_WARDEN') {
+      console.log('Access denied - invalid role:', user.role);
       return NextResponse.json(
         { error: 'Access denied. Only wardens can approve visit requests.' },
         { status: 403 }
