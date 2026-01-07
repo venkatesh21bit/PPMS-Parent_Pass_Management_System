@@ -18,13 +18,18 @@ export default function SecurityDashboard() {
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [recentScans, setRecentScans] = useState<ScanLog[]>([]);
+  const [fetchError, setFetchError] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
+      setFetchError(false);
       const response = await scanAPI.getScanLogs();
+      console.log('Scan logs response:', response.data);
       setScanLogs(response.data.scanLogs || []);
       setRecentScans((response.data.scanLogs || []).slice(0, 5));
-    } catch {
+    } catch (error) {
+      console.error('Error fetching scan logs:', error);
+      setFetchError(true);
       addToast({
         title: 'Error',
         message: 'Failed to load scan logs',
@@ -76,8 +81,13 @@ export default function SecurityDashboard() {
         type: 'success',
       });
 
-      // Refresh data
-      fetchData();
+      // Refresh data - catch errors silently to prevent repeated error toasts
+      try {
+        await fetchData();
+      } catch (error) {
+        console.error('Failed to refresh scan logs after successful scan:', error);
+        // Don't show error toast here since the scan was successful
+      }
 
       // Stop scanner after successful scan
       setScanning(false);
@@ -179,6 +189,38 @@ export default function SecurityDashboard() {
     );
   }
 
+  // Show error state with retry option
+  if (fetchError && (!Array.isArray(scanLogs) || scanLogs.length === 0)) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <ModernHeader
+          title="Security Portal"
+          subtitle={user ? `Welcome back, ${user.name}` : ''}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+            <div className="text-red-500 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Failed to Load Scan Logs</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">There was an error loading the scan logs. Please try again.</p>
+            <button
+              onClick={() => {
+                setLoading(true);
+                fetchData();
+              }}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* ModernHeader for consistent UI */}
@@ -245,7 +287,7 @@ export default function SecurityDashboard() {
                     <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                       {(Array.isArray(scanLogs) ? scanLogs : []).filter(log => 
                         log.scanType === SCAN_TYPES.ENTRY && 
-                        new Date(log.createdAt).toDateString() === new Date().toDateString()
+                        new Date(log.timestamp).toDateString() === new Date().toDateString()
                       ).length}
                     </p>
                   </div>
@@ -270,7 +312,7 @@ export default function SecurityDashboard() {
                               {scan.visitRequest?.student?.name || 'Unknown Student'}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(scan.createdAt).toLocaleString()}
+                              {new Date(scan.timestamp).toLocaleString()}
                             </p>
                           </div>
                         </div>
@@ -340,7 +382,7 @@ export default function SecurityDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white dark:text-white">
-                      {new Date(log.timestamp || log.createdAt).toLocaleString()}
+                      {new Date(log.timestamp).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -372,7 +414,7 @@ export default function SecurityDashboard() {
                     </span>
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-300">
-                    {new Date(log.timestamp || log.createdAt).toLocaleString()}
+                    {new Date(log.timestamp).toLocaleString()}
                   </div>
                   <div className="pt-1">
                     <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">

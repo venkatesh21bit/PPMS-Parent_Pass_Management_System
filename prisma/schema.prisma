@@ -97,6 +97,8 @@ model ScanLog {
   location       String?
   timestamp      DateTime @default(now())
   remarks        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relations
   visitRequest VisitRequest @relation(fields: [visitRequestId], references: [id])

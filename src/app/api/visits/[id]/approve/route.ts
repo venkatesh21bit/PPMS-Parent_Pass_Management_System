@@ -34,8 +34,8 @@ export async function POST(
       );
     }
 
-    // Check if user is WARDEN
-    if (user.role !== 'WARDEN') {
+    // Check if user is WARDEN or HOSTEL_WARDEN
+    if (user.role !== 'WARDEN' && user.role !== 'HOSTEL_WARDEN') {
       return NextResponse.json(
         { error: 'Access denied. Only wardens can approve visit requests.' },
         { status: 403 }
@@ -73,6 +73,16 @@ export async function POST(
         { error: 'Visit request not found' },
         { status: 404 }
       );
+    }
+
+    // Check if hostel warden is approving for their own hostel
+    if (user.role === 'HOSTEL_WARDEN' && user.hostelName) {
+      if (visitRequest.student.hostelName !== user.hostelName) {
+        return NextResponse.json(
+          { error: `Access denied. You can only approve visits for ${user.hostelName} hostel students.` },
+          { status: 403 }
+        );
+      }
     }
 
     // Create approval record
